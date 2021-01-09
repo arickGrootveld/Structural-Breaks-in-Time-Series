@@ -1,15 +1,18 @@
 # Parameters to be used for the simulation
 param1 <- 0.1
-param2 <- 1
+param2 <- 2
 
 alpha = 0.05
+criticalValue = -log(-0.5*log(1-alpha))
 
 simDims = dim(simMatrix)
-denominators <- matrix(0, simDims)
+denominators <- matrix(0, simDims+1)
 
 breakDetected = matrix(0,1, simDims[1])
 
 pVals <- matrix(0, 1, simDims[1])
+
+RSV <- matrix(0, 1, simDims[1])
 
 for (simNum in c(1:simDims[1])){
   simSeq = simMatrix[simNum, ]
@@ -42,16 +45,40 @@ for (simNum in c(1:simDims[1])){
     # Whichever one is larger of the posibilities is the likelihood at this
     # location
     denominators[i] <- max(c(option1, option2))
+    
+    # Correcting to for the potential to have 0 over 0
+    if(denominators[i] == 0 && numerator == 0){
+      denominators[i] = 1
+      numerator = 1
+    }
+    if(i == 1){
+      likelihoodRatio <- -2*log(numerator / denominators[i])
+    } else {
+      likelihoodRatio <- max(likelihoodRatio, -2*log(numerator / denominators[i]))
+    }
   }
   
-  breakLoc <- which.max(denominators[1:length(denominators)-1])
-  denominatorValue <- max(denominators[1:length(denominators)-1])
+  # Very important step
+  # We add the possibility of no breaks into the denominator, so the numberator becomes a subset of the denominator
+  # This is part of the requirement for Wilks's theorm to be true
+  denominators[i+1] = numerator
   
-  likelihoodRatio = -2 * log(numerator / denominatorValue)
+  breakLoc <- which.max(denominators[1:length(denominators)])
+  denominatorValue <- max(denominators[1:length(denominators)])
+  
+  # Accounting for fact that likelihood ratio can be negative
+  if(likelihoodRatio < 0){
+    RSV[1, simNum] = 0
+  } else {
+    # Special value that Ramadha is having us calculate
+    RSV[1,simNum] = (2*log(log(simDims[2])))^(1/2) * (likelihoodRatio)^(1/2) - (2*log(log(simDims[2])) + log(log(log(simDims[2]))))
+  }
+  
+ 
   
   pVals[1,simNum] = 1 - pchisq(likelihoodRatio, df=1)
   # If a break is detected, then we set the enum value to 1 (true)
-  if(pVals[1, simNum] < alpha){
+  if(RSV[1, simNum] > criticalValue){
     breakDetected[1,simNum] = 1
   }
 }

@@ -12,8 +12,8 @@ nEquals200 = c(0,0,0,0)
 
 ## Parameters for the simulation
 param1 = 0.1
-param2 = 1
-numSims = 1000
+param2 = 0.5
+numSims = 10
 
 # Performing simulations
 ################################################################################
