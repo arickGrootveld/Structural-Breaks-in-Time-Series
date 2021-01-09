@@ -1,6 +1,6 @@
 # Parameters to be used for the simulation
 param1 <- 0.1
-param2 <- 2
+param2 <- 0.5
 
 alpha = 0.05
 criticalValue = -log(-0.5*log(1-alpha))
@@ -12,7 +12,7 @@ breakDetected = matrix(0,1, simDims[1])
 
 pVals <- matrix(0, 1, simDims[1])
 
-RSV <- matrix(0, 1, simDims[1])
+testStatistic <- matrix(0, 1, simDims[1])
 
 for (simNum in c(1:simDims[1])){
   simSeq = simMatrix[simNum, ]
@@ -42,20 +42,9 @@ for (simNum in c(1:simDims[1])){
     option1 <- beforePdf1 * afterPdf2
     option2 <- beforePdf2 * afterPdf1
     
-    # Whichever one is larger of the posibilities is the likelihood at this
-    # location
+    # Whichever one is larger of the posibilities is the denominator of the
+    # likelihood ratio at this location
     denominators[i] <- max(c(option1, option2))
-    
-    # Correcting to for the potential to have 0 over 0
-    if(denominators[i] == 0 && numerator == 0){
-      denominators[i] = 1
-      numerator = 1
-    }
-    if(i == 1){
-      likelihoodRatio <- -2*log(numerator / denominators[i])
-    } else {
-      likelihoodRatio <- max(likelihoodRatio, -2*log(numerator / denominators[i]))
-    }
   }
   
   # Very important step
@@ -63,24 +52,26 @@ for (simNum in c(1:simDims[1])){
   # This is part of the requirement for Wilks's theorm to be true
   denominators[i+1] = numerator
   
-  breakLoc <- which.max(denominators[1:length(denominators)])
-  denominatorValue <- max(denominators[1:length(denominators)])
+  breakLoc <- which.max(denominators)
   
-  # Accounting for fact that likelihood ratio can be negative
-  if(likelihoodRatio < 0){
-    RSV[1, simNum] = 0
-  } else {
-    # Special value that Ramadha is having us calculate
-    RSV[1,simNum] = (2*log(log(simDims[2])))^(1/2) * (likelihoodRatio)^(1/2) - (2*log(log(simDims[2])) + log(log(log(simDims[2]))))
-  }
+  #### The Values contained between these lines are for test purposes only, if you see this, please delete them
+  testValues = -2 * log(numerator / denominators)
   
- 
+  #### End of test lines
+  likelihoodRatio = max(-2 * log(numerator / denominators))
+  
+  # Special value that Ramadha is having us calculate
+  testStatistic[1,simNum] = (2*log(log(simDims[2])))^(1/2) * (likelihoodRatio)^(1/2) - (2*log(log(simDims[2])) + log(log(log(simDims[2]))))
   
   pVals[1,simNum] = 1 - pchisq(likelihoodRatio, df=1)
   # If a break is detected, then we set the enum value to 1 (true)
-  if(RSV[1, simNum] > criticalValue){
+  if(testStatistic[1, simNum] > criticalValue){
     breakDetected[1,simNum] = 1
   }
+  
+  #if(pVals[1, simNum] < alpha){
+  #  breakDetected[1,simNum] = 1
+  #}
 }
 
 # Calculating the coverage probability
