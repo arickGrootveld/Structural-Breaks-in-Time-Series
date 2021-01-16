@@ -1,3 +1,10 @@
+############################ CUSUMCalc.R ##################################
+# Function to calculate Likelihood Ratios, for detecting statistical breaks
+# in normally distributed independent data
+#
+# v1.0.1
+# Contributors: Andrea Scolari, Arick Grootveld
+#############################################################################
 normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
   # Calculated parameters to be used for the simulation
   criticalValue = -log(-0.5*log(1-alpha))
@@ -65,10 +72,6 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
     if(testStatistic[1, simNum] > criticalValue){
       breakDetected[1,simNum] = 1
     }
-    
-    #if(pVals[1, simNum] < alpha){
-    #  breakDetected[1,simNum] = 1
-    #}
   }
   
   # Calculating the coverage probability

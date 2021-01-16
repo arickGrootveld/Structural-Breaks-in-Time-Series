@@ -1,8 +1,8 @@
-###### Normal independent data simulation and fill out results tables
-##### This script generates multiple datasets of independent normally 
-##### distributed data, with breaks at specified locations. The script
-##### computes the ability of two methods to detect the pressence of these
-#### breaks: Likelihood Ratio, and CUSUM.
+
+## This script generates multiple datasets of independent normally 
+## distributed data, with breaks at specified locations. The script
+## computes the ability of two methods to detect the pressence of these
+## breaks: Likelihood Ratio, and CUSUM.
 
 # Importing datagen function
 source('indepDatagen.R')
@@ -15,16 +15,8 @@ source('CUSUM/CUSUMBreakEstimator.R')
 
 # Initializing variables
 
-## Arrays to store results of likelihood ratio calculation
-nEquals50LR = c(0,0,0,0)
-nEquals100LR = c(0,0,0,0)
-nEquals200LR = c(0,0,0,0)
-
-nEquals50CS = c(0,0,0,0)
-nEquals100CS = c(0,0,0,0)
-nEquals200CS = c(0,0,0,0)
-
-## Parameters for the simulation data
+# Modifiable Parameters
+################################################################################
 # Difference in mean between distributions
 param1 = 0.1
 param2 = 0.5
@@ -37,10 +29,26 @@ numSims = 100
 lrParam1 = param1
 lrParam2 = param2
 significanceLevel = 0.05
+# Whether to run LR calculation in this expirement or not
+runLR = 1
 
 ## Parameters for the CUSUM
 criticalValueCS = 0.0133
 longRunVariance = 1
+# Whether to run CUSUM calculations in this expirement or not
+runCUSUM = 1
+
+# Variable declarations
+################################################################################
+## Arrays to store results of likelihood ratio calculation
+nEquals50LR = c(0,0,0,0)
+nEquals100LR = c(0,0,0,0)
+nEquals200LR = c(0,0,0,0)
+
+nEquals50CS = c(0,0,0,0)
+nEquals100CS = c(0,0,0,0)
+nEquals200CS = c(0,0,0,0)
+
 
 # Performing simulations
 ################################################################################
@@ -50,11 +58,13 @@ simLen <- 50
 breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-
-nEquals50LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
-
-# Cusum Calc
-nEquals50CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runLR==1){
+  nEquals50LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals50CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 
 ### K=0.3n
@@ -62,10 +72,14 @@ breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals50LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals50CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals50CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 
 ### K=0.5n
@@ -73,10 +87,14 @@ breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals50LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals50CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals50CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 
 ### K=0.75n
@@ -84,11 +102,14 @@ breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals50LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals50CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
-
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals50CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 
 ################################################################################
@@ -99,40 +120,56 @@ breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals100LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals100CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals100CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals100LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals100CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals100CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals100LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals100CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals100CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals100LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals100CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals100CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ################################################################################
 ## n = 200
@@ -142,40 +179,56 @@ breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals200LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals200CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals200CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals200LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals200CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals200CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals200LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals200CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals200CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+if(runLR==1){
+  nEquals200LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+}
 
-# Cusum Calc
-nEquals200CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runCUSUM==1){
+  # Cusum Calc
+  nEquals200CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+}
 
 
 ################################################################################
@@ -194,12 +247,15 @@ results.dataCS <- data.frame(
   nEquals200 = nEquals200CS
 )
 
-
-print('Results for the Likelihood ratio')
-print(results.dataLR)
-
-# Printing new line separator
-writeLines('\r\n')
-
-print("Results for the CUSUM calculation")
-print(results.dataCS)
+## Printing the output tables
+if(runLR == 1){
+  print('Results for the Likelihood ratio')
+  print(results.dataLR)
+  
+  # Printing new line separator
+  writeLines('\r\n')
+}
+if(runCUSUM == 1){
+  print("Results for the CUSUM calculation")
+  print(results.dataCS)
+}

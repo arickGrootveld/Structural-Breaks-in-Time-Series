@@ -1,3 +1,9 @@
+############################ CUSUMCalc.R ##################################
+# Function utilizing CUSUM calculations to detect statistical breaks
+#
+# v1.0.0
+# Contributors: Jamie Shannon, Arick Grootveld
+#############################################################################
 CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
   simDims = dim(simMatrix)
 
