@@ -1,4 +1,4 @@
-CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
+CUSUMCalc <- function(simMatrix, critVal=2.408, longRunVar=1){
   simDims = dim(simMatrix)
 
   Cor=0 #Count for the number of correct changes detected

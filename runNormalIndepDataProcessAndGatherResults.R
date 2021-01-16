@@ -3,6 +3,9 @@
 # Importing datagen function
 source('indepDatagen.R')
 
+# Importing the Likelihood Ration function
+source('LikelihoodRatio/normalDataParametricLikelihood.R')
+
 # Importing CUSUM calculation function
 source('CUSUM/CUSUMBreakEstimator.R')
 
@@ -17,9 +20,11 @@ nEquals50CS = c(0,0,0,0)
 nEquals100CS = c(0,0,0,0)
 nEquals200CS = c(0,0,0,0)
 
-## Parameters for the likelihood ratio simulation 
+## Parameters for the simulation 
+# Difference in mean between distributions
 param1 = 0.1
-param2 = 0.1
+param2 = 0.5
+# Number of simulations to perform
 numSims = 100
 
 # Performing simulations
@@ -30,8 +35,8 @@ simLen <- 50
 breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals50LR[1] = coverageProbability
+
+nEquals50LR[1] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals50CS[1] = CUSUMCalc(simMatrix)
@@ -41,8 +46,8 @@ nEquals50CS[1] = CUSUMCalc(simMatrix)
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals50LR[2] = coverageProbability
+
+nEquals50LR[2] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals50CS[2] = CUSUMCalc(simMatrix)
@@ -52,8 +57,8 @@ nEquals50CS[2] = CUSUMCalc(simMatrix)
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals50LR[3] = coverageProbability
+
+nEquals50LR[3] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals50CS[3] = CUSUMCalc(simMatrix)
@@ -63,8 +68,8 @@ nEquals50CS[3] = CUSUMCalc(simMatrix)
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals50LR[4] = coverageProbability
+
+nEquals50LR[4] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals50CS[4] = CUSUMCalc(simMatrix)
@@ -78,8 +83,8 @@ simLen <- 100
 breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals100LR[1] = coverageProbability
+
+nEquals100LR[1] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals100CS[1] = CUSUMCalc(simMatrix)
@@ -88,8 +93,8 @@ nEquals100CS[1] = CUSUMCalc(simMatrix)
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals100LR[2] = coverageProbability
+
+nEquals100LR[2] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals100CS[2] = CUSUMCalc(simMatrix)
@@ -98,8 +103,8 @@ nEquals100CS[2] = CUSUMCalc(simMatrix)
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals100LR[3] = coverageProbability
+
+nEquals100LR[3] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals100CS[3] = CUSUMCalc(simMatrix)
@@ -108,8 +113,8 @@ nEquals100CS[3] = CUSUMCalc(simMatrix)
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals100LR[4] = coverageProbability
+
+nEquals100LR[4] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals100CS[4] = CUSUMCalc(simMatrix)
@@ -121,8 +126,8 @@ simLen <- 200
 breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals200LR[1] = coverageProbability
+
+nEquals200LR[1] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals200CS[1] = CUSUMCalc(simMatrix)
@@ -131,8 +136,8 @@ nEquals200CS[1] = CUSUMCalc(simMatrix)
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals200LR[2] = coverageProbability
+
+nEquals200LR[2] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals200CS[2] = CUSUMCalc(simMatrix)
@@ -141,8 +146,8 @@ nEquals200CS[2] = CUSUMCalc(simMatrix)
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals200LR[3] = coverageProbability
+
+nEquals200LR[3] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals200CS[3] = CUSUMCalc(simMatrix)
@@ -151,8 +156,8 @@ nEquals200CS[3] = CUSUMCalc(simMatrix)
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
-nEquals200LR[4] = coverageProbability
+
+nEquals200LR[4] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
 
 # Cusum Calc
 nEquals200CS[4] = CUSUMCalc(simMatrix)
