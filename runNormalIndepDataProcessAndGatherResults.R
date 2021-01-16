@@ -24,12 +24,23 @@ nEquals50CS = c(0,0,0,0)
 nEquals100CS = c(0,0,0,0)
 nEquals200CS = c(0,0,0,0)
 
-## Parameters for the simulation 
+## Parameters for the simulation data
 # Difference in mean between distributions
 param1 = 0.1
 param2 = 0.5
 # Number of simulations to perform
 numSims = 100
+
+## Parameters for the Likelihood ratio
+# lr params set to the simulation params to improve accuracy, but can be adjusted
+# to evaluate the amount of error caused by parametric mismatch
+lrParam1 = param1
+lrParam2 = param2
+significanceLevel = 0.05
+
+## Parameters for the CUSUM
+criticalValueCS = 0.0133
+longRunVariance = 1
 
 # Performing simulations
 ################################################################################
@@ -40,10 +51,10 @@ breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[1] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals50LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals50CS[1] = CUSUMCalc(simMatrix)
+nEquals50CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 
 ### K=0.3n
@@ -51,10 +62,10 @@ breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[2] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals50LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals50CS[2] = CUSUMCalc(simMatrix)
+nEquals50CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 
 ### K=0.5n
@@ -62,10 +73,10 @@ breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[3] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals50LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals50CS[3] = CUSUMCalc(simMatrix)
+nEquals50CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 
 ### K=0.75n
@@ -73,10 +84,10 @@ breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals50LR[4] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals50LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals50CS[4] = CUSUMCalc(simMatrix)
+nEquals50CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 
 
@@ -88,40 +99,40 @@ breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[1] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals100LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals100CS[1] = CUSUMCalc(simMatrix)
+nEquals100CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[2] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals100LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals100CS[2] = CUSUMCalc(simMatrix)
+nEquals100CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[3] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals100LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals100CS[3] = CUSUMCalc(simMatrix)
+nEquals100CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals100LR[4] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals100LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals100CS[4] = CUSUMCalc(simMatrix)
+nEquals100CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ################################################################################
 ## n = 200
@@ -131,40 +142,40 @@ breakLocs <- 0.2 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[1] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals200LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals200CS[1] = CUSUMCalc(simMatrix)
+nEquals200CS[1] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[2] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals200LR[2] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals200CS[2] = CUSUMCalc(simMatrix)
+nEquals200CS[2] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[3] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals200LR[3] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals200CS[3] = CUSUMCalc(simMatrix)
+nEquals200CS[3] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
-nEquals200LR[4] = normalIndepLRCalc(param1, param2, simMatrix, alpha=0.05)
+nEquals200LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 
 # Cusum Calc
-nEquals200CS[4] = CUSUMCalc(simMatrix)
+nEquals200CS[4] = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
 
 
 ################################################################################
