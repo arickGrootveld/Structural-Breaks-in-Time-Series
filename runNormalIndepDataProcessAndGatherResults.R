@@ -1,4 +1,8 @@
-# Run normal independent data simulation and fill out results table
+###### Normal independent data simulation and fill out results tables
+##### This script generates multiple datasets of independent normally 
+##### distributed data, with breaks at specified locations. The script
+##### computes the ability of two methods to detect the pressence of these
+#### breaks: Likelihood Ratio, and CUSUM.
 
 # Importing datagen function
 source('indepDatagen.R')
@@ -188,5 +192,3 @@ writeLines('\r\n')
 
 print("Results for the CUSUM calculation")
 print(results.dataCS)
-
-
