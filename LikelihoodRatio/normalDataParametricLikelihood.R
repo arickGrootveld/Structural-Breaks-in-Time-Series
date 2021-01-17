@@ -5,7 +5,7 @@
 # v1.0.1
 # Contributors: Andrea Scolari, Arick Grootveld
 #############################################################################
-normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
+normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
   # Calculated parameters to be used for the simulation
   criticalValue = -log(-0.5*log(1-alpha))
   
@@ -21,6 +21,8 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
   for (simNum in c(1:simDims[1])){
     simSeq = simMatrix[simNum, ]
     
+    simSeqLen = length(simSeq)
+    
     denominators <- matrix(0, 1, length(simSeq))
     
     # Calculating pdfs of each sample coming from each parameter only
@@ -29,11 +31,11 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
     
     numerator = max(c(fromDist1Prob, fromDist2Prob))
     
-    for (i in c(2:length(simSeq)-1)){
+    for (i in c(1:(simSeqLen-1))){
       # Grabbing the sequence from before where we think the break happened
       before <- simSeq[1:i]
       # Grabbing the sequence from after the location the break happened
-      after <- simSeq[i:length(simSeq)]
+      after <- simSeq[(i+1):(simSeqLen)]
       
       # Calculating the probablities of each of the samples being from the before distribution
       beforePdf1 <- prod(dnorm(before, mean=param1, sd=1))
@@ -54,12 +56,9 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
     # Very important step
     # We add the possibility of no breaks into the denominator, so the numberator becomes a subset of the denominator
     # This is part of the requirement for Wilks's theorm to be true
-    denominators[i+1] = numerator
+    # denominators[i+1] = numerator
     
     breakLoc <- which.max(denominators)
-    
-    #### The Values contained between these lines are for test purposes only, if you see this, please delete them
-    testValues = -2 * log(numerator / denominators)
     
     #### End of test lines
     likelihoodRatio = max(-2 * log(numerator / denominators))
@@ -68,6 +67,11 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.5){
     testStatistic[1,simNum] = (2*log(log(simDims[2])))^(1/2) * (likelihoodRatio)^(1/2) - (2*log(log(simDims[2])) + log(log(log(simDims[2]))))
     
     pVals[1,simNum] = 1 - pchisq(likelihoodRatio, df=1)
+    
+    #if(pVals[1, simNum] < alpha){
+    #  breakDetected[1, simNum] = 1
+    #}
+    
     # If a break is detected, then we set the enum value to 1 (true)
     if(testStatistic[1, simNum] > criticalValue){
       breakDetected[1,simNum] = 1

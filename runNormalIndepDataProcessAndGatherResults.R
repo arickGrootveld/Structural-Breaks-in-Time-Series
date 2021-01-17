@@ -19,9 +19,9 @@ source('CUSUM/CUSUMBreakEstimator.R')
 ################################################################################
 # Difference in mean between distributions
 param1 = 0.1
-param2 = 0.5
+param2 = 1
 # Number of simulations to perform
-numSims = 100
+numSims = 20
 
 ## Parameters for the Likelihood ratio
 # lr params set to the simulation params to improve accuracy, but can be adjusted
@@ -36,7 +36,7 @@ runLR = 1
 criticalValueCS = 0.0133
 longRunVariance = 1
 # Whether to run CUSUM calculations in this expirement or not
-runCUSUM = 1
+runCUSUM = 0
 
 # Variable declarations
 ################################################################################
