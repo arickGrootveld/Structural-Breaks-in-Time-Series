@@ -2,7 +2,7 @@
 # Function to calculate Likelihood Ratios, for detecting statistical breaks
 # in normally distributed independent data
 #
-# v1.0.1
+# v1.0.2
 # Contributors: Andrea Scolari, Arick Grootveld
 #############################################################################
 normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
@@ -25,11 +25,8 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
     
     denominators <- matrix(0, 1, length(simSeq))
     
-    # Calculating pdfs of each sample coming from each parameter only
-    fromDist1Prob = prod(dnorm(simSeq, mean=param1, sd=1))
-    fromDist2Prob = prod(dnorm(simSeq, mean=param2, sd=1))
-    
-    numerator = max(c(fromDist1Prob, fromDist2Prob))
+    # Calculating the numerator of the likelihood ratio as the pdf of each sample coming from a distribution with mean equal to the sample mean
+    numerator = prod(dnorm(simSeq, mean=mean(simSeq), sd=1))
     
     for (i in c(1:(simSeqLen-1))){
       # Grabbing the sequence from before where we think the break happened
@@ -72,9 +69,18 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
     #  breakDetected[1, simNum] = 1
     #}
     
+    # If our test statistic is NaN, then we want to reject
+    # This only happens if the maximal LR is negative
+    if(is.na(testStatistic[1,simNum])){
+      breakDetected[1,simNum] = 0
+    }
     # If a break is detected, then we set the enum value to 1 (true)
-    if(testStatistic[1, simNum] > criticalValue){
+    else if(testStatistic[1, simNum] > criticalValue){
       breakDetected[1,simNum] = 1
+    }
+    # Technically redundant, since its already defaulted to zeros, but just to be safe
+    else{
+      breakDetected[1,simNum] = 0
     }
   }
   
