@@ -18,9 +18,11 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
   
   testStatistic <- matrix(0, 1, simDims[1])
   
+  # For loop through all simulations
   for (simNum in c(1:simDims[1])){
     simSeq = simMatrix[simNum, ]
     
+    # The current simulation
     simSeqLen = length(simSeq)
     
     denominators <- matrix(0, 1, length(simSeq))
@@ -28,6 +30,7 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
     # Calculating the numerator of the likelihood ratio as the pdf of each sample coming from a distribution with mean equal to the sample mean
     numerator = prod(dnorm(simSeq, mean=mean(simSeq), sd=1))
     
+    # For loop through each index of potential break
     for (i in c(1:(simSeqLen-1))){
       # Grabbing the sequence from before where we think the break happened
       before <- simSeq[1:i]
@@ -37,6 +40,7 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
       # Calculating the probablities of each of the samples being from the before distribution
       beforePdf1 <- prod(dnorm(before, mean=param1, sd=1))
       beforePdf2 <- prod(dnorm(before, mean=param2, sd=1))
+      
       # Calculating the probabilities of each of the samples from the after distribution
       afterPdf1 <- prod(dnorm(after, mean=param1, sd=1))
       afterPdf2 <- prod(dnorm(after, mean=param2, sd=1))
@@ -47,10 +51,11 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
       
       # Whichever one is larger of the posibilities is the denominator of the
       # likelihood ratio at this location
-      denominators[i] <- max(c(option1, option2))
+      #denominators[i] <- max(c(option1, option2))
+      denominators[i] <- option1
     }
     
-    # Very important step
+    ## No longer relevant
     # We add the possibility of no breaks into the denominator, so the numberator becomes a subset of the denominator
     # This is part of the requirement for Wilks's theorm to be true
     # denominators[i+1] = numerator
@@ -63,7 +68,7 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
     # Special value that Ramadha is having us calculate
     testStatistic[1,simNum] = (2*log(log(simDims[2])))^(1/2) * (likelihoodRatio)^(1/2) - (2*log(log(simDims[2])) + log(log(log(simDims[2]))))
     
-    pVals[1,simNum] = 1 - pchisq(likelihoodRatio, df=1)
+    # pVals[1,simNum] = 1 - pchisq(likelihoodRatio, df=1)
     
     #if(pVals[1, simNum] < alpha){
     #  breakDetected[1, simNum] = 1

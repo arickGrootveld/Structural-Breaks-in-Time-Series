@@ -18,10 +18,13 @@ source('CUSUM/CUSUMBreakEstimator.R')
 # Modifiable Parameters
 ################################################################################
 # Difference in mean between distributions
-param1 = 0.1
-param2 = 1
+param1 = 10
+param2 = 11
 # Number of simulations to perform
-numSims = 20
+numSims = 1000
+
+# Seed for simulations
+set.seed(53)
 
 ## Parameters for the Likelihood ratio
 # lr params set to the simulation params to improve accuracy, but can be adjusted
@@ -98,7 +101,8 @@ if(runCUSUM==1){
 
 
 ### K=0.75n
-breakLocs <- 0.75 * simLen
+#breakLocs <- 0.75 * simLen
+breakLocs = 38
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
 # LR Calculation
 
