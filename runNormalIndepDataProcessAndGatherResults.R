@@ -18,13 +18,14 @@ source('CUSUM/CUSUMBreakEstimator.R')
 # Modifiable Parameters
 ################################################################################
 # Difference in mean between distributions
-param1 = 10
-param2 = 11
+param1 = 1
+param2 = 0.1
 # Number of simulations to perform
-numSims = 1000
+numSims = 200
 
-# Seed for simulations
-set.seed(53)
+# Seed for simulations (if set to 0, the seed is random, and any previously 
+# set seed is globally cleared)
+curSeed = 0
 
 ## Parameters for the Likelihood ratio
 # lr params set to the simulation params to improve accuracy, but can be adjusted
@@ -59,7 +60,7 @@ nEquals200CS = c(0,0,0,0)
 simLen <- 50
 ### K=0.2n
 breakLocs <- 0.2 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 if(runLR==1){
   nEquals50LR[1] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
@@ -72,7 +73,7 @@ if(runCUSUM==1){
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -87,7 +88,7 @@ if(runCUSUM==1){
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -101,11 +102,9 @@ if(runCUSUM==1){
 
 
 ### K=0.75n
-#breakLocs <- 0.75 * simLen
-breakLocs = 38
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+breakLocs <- 0.75 * simLen
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
-
 if(runLR==1){
   nEquals50LR[4] = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
 }
@@ -121,7 +120,7 @@ if(runCUSUM==1){
 simLen <- 100
 ### K=0.2n
 breakLocs <- 0.2 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -135,7 +134,7 @@ if(runCUSUM==1){
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -149,7 +148,7 @@ if(runCUSUM==1){
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -163,7 +162,7 @@ if(runCUSUM==1){
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -180,7 +179,7 @@ if(runCUSUM==1){
 simLen <- 200
 ### K=0.2n
 breakLocs <- 0.2 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -194,7 +193,7 @@ if(runCUSUM==1){
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -208,7 +207,7 @@ if(runCUSUM==1){
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){
@@ -222,7 +221,7 @@ if(runCUSUM==1){
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
 # LR Calculation
 
 if(runLR==1){

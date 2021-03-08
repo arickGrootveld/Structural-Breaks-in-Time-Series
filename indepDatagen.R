@@ -86,6 +86,12 @@ indepDatagen <- function(simLen, numSims, param1=0.1, param2=0.2, randomBreaks=F
     # since that would result in a simulation with only one type of distribution
     breakLocs <- sample(2:(simLen - 1), numSims)
   } else {
+    # If not having random breaks, then use the predefined break location, or 
+    # array of break locations to determine where the dataset should break
+    
+    # Rounding all break locations so that we don't end up with non-integers 
+    # because non-integers end up causing problems with our program
+    breakLocations <- round(breakLocations)
     if(length(breakLocations) == 1){
       # If one break location was set then we simply say all sims should
       # have a break at that location
