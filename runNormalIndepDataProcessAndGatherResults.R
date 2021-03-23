@@ -34,13 +34,13 @@ lrParam1 = param1
 lrParam2 = param2
 significanceLevel = 0.05
 # Whether to run LR calculation in this expirement or not
-runLR = 1
+runLR = 0
 
 ## Parameters for the CUSUM
-criticalValueCS = 0.0133
+criticalValueCS = 2.408
 longRunVariance = 1
 # Whether to run CUSUM calculations in this expirement or not
-runCUSUM = 0
+runCUSUM = 1
 
 # Variable declarations
 ################################################################################

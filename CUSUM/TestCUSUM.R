@@ -1,12 +1,19 @@
-############################ CUSUMCalc.R ##################################
-# Function utilizing CUSUM calculations to detect statistical breaks
-#
-# v1.0.0
-# Contributors: Jamie Shannon, Arick Grootveld
-#############################################################################
-CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
-  simDims = dim(simMatrix)
+# Importing datagen function
+source('indepDatagen.R')
 
+## Parameters for the CUSUM
+criticalValueCS = 2.408
+longRunVariance = 1
+
+simMatrix <- indepDatagen(simLen=100, numSims=100, breakLocations=50, param1=0.1, param2=1, seed=0)
+
+test = CUSUMCalc(simMatrix, critVal = criticalValueCS, longRunVar = longRunVariance)
+
+print('Did this work')
+
+CUSUMCalc <- function(simMatrix, critVal=2.408, longRunVar=1){
+  simDims = dim(simMatrix)
+  
   Cor=0 #Count for the number of correct changes detected
   Mty=NULL
   
@@ -37,9 +44,23 @@ CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
 # Moved function declarations outside of loops
 # Should probably talk to the group about this
 TestStat<-function(y,x,n){ #Test Statistic (Zn) from Aue and ALexander
-  return((1/(sqrt(n)))*((sum(y[1:floor(n*x)]))-(((floor(n*x))/(n))*(sum(y[1:n])))))
+  
+  #print('Start First:')
+  #firstSum = sum(y[1:floor(n*x)])
+  #print(firstSum)
+  
+  #print('Start Second:')
+  #secondSum = (floor(n*x)/n) * sum(y[1:n])
+  #print(floor(n*x)/n)
+  #print(sum(y[1:n]))
+  #print(secondSum)
+  retVal = ((1/(sqrt(n)))*((sum(y[1:floor(n*x)]))-(((floor(n*x))/(n))*(sum(y[1:n])))))
+  #print('Returned value')
+  #print(retVal)
+  
+  return(retVal)
 }
 
 MaxType=function(m,w){ #Max Type Function from Aue Alexander
-  return((1/w)*m)
+  (1/w)*m
 }
