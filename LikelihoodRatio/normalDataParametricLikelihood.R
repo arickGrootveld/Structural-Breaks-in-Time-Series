@@ -18,6 +18,10 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
   
   testStatistic <- matrix(0, 1, simDims[1])
   
+  # Preallocating an array to contain the indexes of the estimated breaks, so we can calculate the break point location accuracy of
+  # our algorithms
+  detectedBreakIndexes = matrix(-1, 1, simDims[1])
+  
   # For loop through all simulations
   for (simNum in c(1:simDims[1])){
     simSeq = simMatrix[simNum, ]
@@ -62,6 +66,7 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
     
     breakLoc <- which.max(denominators)
     
+    
     #### End of test lines
     likelihoodRatio = max(-2 * log(numerator / denominators))
     
@@ -81,6 +86,7 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
     }
     # If a break is detected, then we set the enum value to 1 (true)
     else if(testStatistic[1, simNum] > criticalValue){
+      detectedBreakIndexes[1,simNum] = breakLoc
       breakDetected[1,simNum] = 1
     }
     # Technically redundant, since its already defaulted to zeros, but just to be safe
@@ -92,5 +98,6 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
   # Calculating the coverage probability
   numDetected <- sum(breakDetected)
   
-  return(coverageProbability <- numDetected / simDims[1])
+  coverageProbability <- numDetected / simDims[1]
+  return(c(coverageProbability, detectedBreakIndexes))
 }
