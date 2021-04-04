@@ -42,6 +42,16 @@ longRunVariance = 1
 # Whether to run CUSUM calculations in this expirement or not
 runCUSUM = 1
 
+## Parameters defining the type of output the user wants to see
+# This will tell the code to either output the percent error in detected break locations, or not (1 to run, 0 to not)
+showBreakLocDetectAcc = 1
+
+# This will tell the code to output coverage probability curves for the method (TODO: Implement this)
+showCoverageProbabilityCurves = 1
+# If the above variable is 1, then this variable will set the step size of the variable used to linearly interpolate the 
+# line of the coverage probability curve
+covProbParamStepSize = 0.1
+
 # Variable declarations
 ################################################################################
 ## Arrays to store results of likelihood ratio and CUSUM calculations
@@ -74,14 +84,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[1] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25LR[1] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25LR[1] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25LR[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25LR[1] = -1
+    }
   }
 }
 
@@ -90,15 +103,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals25CS[1] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25CS[1] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25CS[1] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25CS[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25CS[1] = -1
+    }
   }
 }
 
@@ -111,14 +127,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[2] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25LR[2] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25LR[2] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25LR[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25LR[2] = -1
+    }
   }
 }
 
@@ -127,15 +146,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals25CS[2] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25CS[2] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25CS[2] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25CS[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25CS[2] = -1
+    }
   }
 }
 
@@ -148,14 +170,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[3] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25LR[3] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25LR[3] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25LR[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25LR[3] = -1
+    }
   }
 }
 
@@ -164,15 +189,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals25CS[3] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25CS[3] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25CS[3] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25CS[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25CS[3] = -1
+    }
   }
 }
 
@@ -184,14 +212,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[4] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25LR[4] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25LR[4] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25LR[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25LR[4] = -1
+    }
   }
 }
 
@@ -200,15 +231,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals25CS[4] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Getting all break detection indexes so we can calculate the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes25CS[4] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes25CS[4] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Getting all break detection indexes so we can calculate the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes25CS[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes25CS[4] = -1
+    }
   }
 }
 
@@ -224,14 +258,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[1] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100LR[1] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100LR[1] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100LR[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100LR[1] = -1
+    }
   }
 }
 
@@ -240,15 +277,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals100CS[1] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100CS[1] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100CS[1] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100CS[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100CS[1] = -1
+    }
   }
 }
 
@@ -260,14 +300,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[2] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100LR[2] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100LR[2] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100LR[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100LR[2] = -1
+    }
   }
 }
 
@@ -276,15 +319,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals100CS[2] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100CS[2] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100CS[2] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100CS[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100CS[2] = -1
+    }
   }
 }
 
@@ -296,14 +342,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[3] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100LR[3] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100LR[3] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100LR[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100LR[3] = -1
+    }
   }
 }
 
@@ -312,15 +361,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals100CS[3] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100CS[3] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100CS[3] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100CS[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100CS[3] = -1
+    }
   }
 }
 
@@ -332,14 +384,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[4] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100LR[4] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100LR[4] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100LR[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100LR[4] = -1
+    }
   }
 }
 
@@ -348,15 +403,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals100CS[4] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes100CS[4] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes100CS[4] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100CS[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100CS[4] = -1
+    }
   }
 }
 
@@ -371,14 +429,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[1] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200LR[1] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200LR[1] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200LR[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200LR[1] = -1
+    }
   }
 }
 
@@ -387,15 +448,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals200CS[1] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200CS[1] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200CS[1] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200CS[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200CS[1] = -1
+    }
   }
 }
 ### K=0.3n
@@ -406,14 +470,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[2] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200LR[2] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200LR[2] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200LR[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200LR[2] = -1
+    }
   }
 }
 
@@ -422,15 +489,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals200CS[2] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200CS[2] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200CS[2] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200CS[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200CS[2] = -1
+    }
   }
 }
 
@@ -442,14 +512,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[3] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200LR[3] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200LR[3] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200LR[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200LR[3] = -1
+    }
   }
 }
 
@@ -459,15 +532,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals200CS[3] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200CS[3] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200CS[3] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200CS[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200CS[3] = -1
+    }
   }
 }
 
@@ -479,14 +555,17 @@ simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLo
 if(runLR==1){
   retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[4] = retVal[1]
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200LR[4] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200LR[4] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200LR[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200LR[4] = -1
+    }
   }
 }
 
@@ -496,15 +575,18 @@ if(runCUSUM==1){
   retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
   # Grabbing the coverage probability
   nEquals200CS[4] = retVal[1]
-  # If we detected at least one break then we can get an estimate of the break index
-  if(retVal[1] > 0){
-    # Calculating the average index of detected break
-    indexesOfDetectedBreaks = retVal[-1]
-    # Removing indexes where a break wasn't detected
-    indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-    breakIndexes200CS[4] = mean(indexesOfDetectedBreaks)
-  }else{
-    breakIndexes200CS[4] = -1
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200CS[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200CS[4] = -1
+    }
   }
 }
 
@@ -527,159 +609,164 @@ results.dataCS <- data.frame(
 
 ## Constructing the output table for the detected break locations
 # Getting actual break locations so we can calculate error of the detected break locations
-bAt25For_0_2n = round(25 * 0.2)
-bAt25For_0_3n = round(25 * 0.3)
-bAt25For_0_5n = round(25 * 0.5)
-bAt25For_0_75n = round(25 * 0.75)
-
-bAt100For_0_2n = round(100 * 0.2)
-bAt100For_0_3n = round(100 * 0.3)
-bAt100For_0_5n = round(100 * 0.5)
-bAt100For_0_75n = round(100 * 0.75)
-
-bAt200For_0_2n = round(200 * 0.2)
-bAt200For_0_3n = round(200 * 0.3)
-bAt200For_0_5n = round(200 * 0.5)
-bAt200For_0_75n = round(200 * 0.75)
-
-
-## Calculating the error of the LR method's break location detection
-breakResults25_LR = c(-1,-1,-1,-1)
-breakResults100_LR = c(-1, -1, -1, -1)
-breakResults200_LR = c(-1,-1,-1,-1)
-# Calculating the error when n=25 (in terms of percent of total samples)
-# If a break was detected we can do the calculation, otherwise we leave it as -1
-if(breakIndexes25LR[1] > 0){
-  breakResults25_LR[1] = abs(breakIndexes25LR[1] - bAt25For_0_2n) / 25
+if(showBreakLocDetectAcc == 1){
+  bAt25For_0_2n = round(25 * 0.2)
+  bAt25For_0_3n = round(25 * 0.3)
+  bAt25For_0_5n = round(25 * 0.5)
+  bAt25For_0_75n = round(25 * 0.75)
+  
+  bAt100For_0_2n = round(100 * 0.2)
+  bAt100For_0_3n = round(100 * 0.3)
+  bAt100For_0_5n = round(100 * 0.5)
+  bAt100For_0_75n = round(100 * 0.75)
+  
+  bAt200For_0_2n = round(200 * 0.2)
+  bAt200For_0_3n = round(200 * 0.3)
+  bAt200For_0_5n = round(200 * 0.5)
+  bAt200For_0_75n = round(200 * 0.75)
+  
+  
+  ## Calculating the error of the LR method's break location detection
+  breakResults25_LR = c(-1,-1,-1,-1)
+  breakResults100_LR = c(-1, -1, -1, -1)
+  breakResults200_LR = c(-1,-1,-1,-1)
+  # Calculating the error when n=25 (in terms of percent of total samples)
+  # If a break was detected we can do the calculation, otherwise we leave it as -1
+  if(breakIndexes25LR[1] > 0){
+    breakResults25_LR[1] = 100 * abs(breakIndexes25LR[1] - bAt25For_0_2n) / 25
+  }
+  
+  if(breakIndexes25LR[2] > 0){
+    breakResults25_LR[2] = 100 * abs(breakIndexes25LR[1] - bAt25For_0_3n) / 25
+  }
+  
+  if(breakIndexes25LR[3] > 0){
+    breakResults25_LR[3] = 100 * abs(breakIndexes25LR[3] - bAt25For_0_5n) / 25
+  }
+  
+  if(breakIndexes25LR[4] > 0){
+    breakResults25_LR[4] = 100 * abs(breakIndexes25LR[4] - bAt25For_0_75n) / 25
+  }
+  
+  # Calculating the error when n=100 (in terms of percent of total samples)
+  if(breakIndexes100LR[1] > 0){
+    breakResults100_LR[1] = 100 * abs(breakIndexes100LR[1] - bAt100For_0_2n) / 100
+  }
+  
+  if(breakIndexes100LR[2] > 0){
+    breakResults100_LR[2] = 100 * abs(breakIndexes100LR[2] - bAt100For_0_3n) / 100
+  }
+  
+  if(breakIndexes100LR[3] > 0){
+    breakResults100_LR[3] = 100 * abs(breakIndexes100LR[3] - bAt100For_0_5n) / 100
+  }
+  
+  if(breakIndexes100LR[4] > 0){
+    breakResults100_LR[4] = 100 * abs(breakIndexes100LR[4] - bAt100For_0_75n) / 100
+  }
+  
+  # Calculating the error when n=200 (in terms of percent of total samples)
+  if(breakIndexes200LR[1] > 0){
+    breakResults200_LR[1] = 100 * abs(breakIndexes200LR[1] - bAt200For_0_2n) / 200
+  }
+  
+  if(breakIndexes200LR[2] > 0){
+    breakResults200_LR[2] = 100 * abs(breakIndexes200LR[2] - bAt200For_0_3n) / 200
+  }
+  
+  if(breakIndexes200LR[3] > 0){
+    breakResults200_LR[3] = 100 * abs(breakIndexes200LR[3] - bAt200For_0_5n) / 200
+  }
+  
+  if(breakIndexes200LR[4] > 0){
+    breakResults200_LR[4] = 100 * abs(breakIndexes200LR[4] - bAt200For_0_75n) / 200
+  }
+  
+  breakResults.dataLR <- data.frame(
+    breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
+    nEquals25 = breakResults25_LR,
+    nEquals100 = breakResults100_LR,
+    nEquals200 = breakResults200_LR
+  )
+  
+  
+  ## Calculating the error of the CUSUM's break location detection
+  breakResults25_CS = c(-1,-1,-1,-1)
+  breakResults100_CS = c(-1, -1, -1, -1)
+  breakResults200_CS = c(-1,-1,-1,-1)
+  # Calculating the error when n=25 (in terms of percent of total samples)
+  # If a break was detected we can do the calculation, otherwise we leave it as -1
+  if(breakIndexes25CS[1] > 0){
+    breakResults25_CS[1] = 100 * abs(breakIndexes25CS[1] - bAt25For_0_2n) / 25
+  }
+  
+  if(breakIndexes25CS[2] > 0){
+    breakResults25_CS[2] = 100 * abs(breakIndexes25CS[1] - bAt25For_0_3n) / 25
+  }
+  
+  if(breakIndexes25CS[3] > 0){
+    breakResults25_CS[3] = 100 * abs(breakIndexes25CS[3] - bAt25For_0_5n) / 25
+  }
+  
+  if(breakIndexes25CS[4] > 0){
+    breakResults25_CS[4] = 100 * abs(breakIndexes25CS[4] - bAt25For_0_75n) / 25
+  }
+  
+  # Calculating the error when n=100 (in terms of percent of total samples)
+  if(breakIndexes100CS[1] > 0){
+    breakResults100_CS[1] = 100 * abs(breakIndexes100CS[1] - bAt100For_0_2n) / 100
+  }
+  
+  if(breakIndexes100CS[2] > 0){
+    breakResults100_CS[2] = 100 * abs(breakIndexes100CS[2] - bAt100For_0_3n) / 100
+  }
+  
+  if(breakIndexes100CS[3] > 0){
+    breakResults100_CS[3] = 100 * abs(breakIndexes100CS[3] - bAt100For_0_5n) / 100
+  }
+  
+  if(breakIndexes100CS[4] > 0){
+    breakResults100_CS[4] = 100 * abs(breakIndexes100CS[4] - bAt100For_0_75n) / 100
+  }
+  
+  # Calculating the error when n=200 (in terms of percent of total samples)
+  if(breakIndexes200CS[1] > 0){
+    breakResults200_CS[1] = 100 * abs(breakIndexes200CS[1] - bAt200For_0_2n) / 200
+  }
+  
+  if(breakIndexes200CS[2] > 0){
+    breakResults200_CS[2] = 100 * abs(breakIndexes200CS[2] - bAt200For_0_3n) / 200
+  }
+  
+  if(breakIndexes200CS[3] > 0){
+    breakResults200_CS[3] = 100 * abs(breakIndexes200CS[3] - bAt200For_0_5n) / 200
+  }
+  
+  if(breakIndexes200CS[4] > 0){
+    breakResults200_CS[4] = 100 * abs(breakIndexes200CS[4] - bAt200For_0_75n) / 200
+  }
+  
+  breakResults.dataCS <- data.frame(
+    breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
+    nEquals25 = breakResults25_CS,
+    nEquals100 = breakResults100_CS,
+    nEquals200 = breakResults200_CS
+  )
 }
-
-if(breakIndexes25LR[2] > 0){
-  breakResults25_LR[2] = abs(breakIndexes25LR[1] - bAt25For_0_3n) / 25
-}
-
-if(breakIndexes25LR[3] > 0){
-  breakResults25_LR[3] = abs(breakIndexes25LR[3] - bAt25For_0_5n) / 25
-}
-
-if(breakIndexes25LR[4] > 0){
-  breakResults25_LR[4] = abs(breakIndexes25LR[4] - bAt25For_0_75n) / 25
-}
-
-# Calculating the error when n=100 (in terms of percent of total samples)
-if(breakIndexes100LR[1] > 0){
-  breakResults100_LR[1] = abs(breakIndexes100LR[1] - bAt100For_0_2n) / 100
-}
-
-if(breakIndexes100LR[2] > 0){
-  breakResults100_LR[2] = abs(breakIndexes100LR[2] - bAt100For_0_3n) / 100
-}
-
-if(breakIndexes100LR[3] > 0){
-  breakResults100_LR[3] = abs(breakIndexes100LR[3] - bAt100For_0_5n) / 100
-}
-
-if(breakIndexes100LR[4] > 0){
-  breakResults100_LR[4] = abs(breakIndexes100LR[4] - bAt100For_0_75n) / 100
-}
-
-# Calculating the error when n=200 (in terms of percent of total samples)
-if(breakIndexes200LR[1] > 0){
-  breakResults200_LR[1] = abs(breakIndexes200LR[1] - bAt200For_0_2n) / 200
-}
-
-if(breakIndexes200LR[2] > 0){
-  breakResults200_LR[2] = abs(breakIndexes200LR[2] - bAt200For_0_3n) / 200
-}
-
-if(breakIndexes200LR[3] > 0){
-  breakResults200_LR[3] = abs(breakIndexes200LR[3] - bAt200For_0_5n) / 200
-}
-
-if(breakIndexes200LR[4] > 0){
-  breakResults200_LR[4] = abs(breakIndexes200LR[4] - bAt200For_0_75n) / 200
-}
-
-breakResults.dataLR <- data.frame(
-  breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
-  nEquals25 = breakResults25_LR,
-  nEquals100 = breakResults100_LR,
-  nEquals200 = breakResults200_LR
-)
-
-
-## Calculating the error of the CUSUM's break location detection
-breakResults25_CS = c(-1,-1,-1,-1)
-breakResults100_CS = c(-1, -1, -1, -1)
-breakResults200_CS = c(-1,-1,-1,-1)
-# Calculating the error when n=25 (in terms of percent of total samples)
-# If a break was detected we can do the calculation, otherwise we leave it as -1
-if(breakIndexes25CS[1] > 0){
-  breakResults25_CS[1] = abs(breakIndexes25CS[1] - bAt25For_0_2n) / 25
-}
-
-if(breakIndexes25CS[2] > 0){
-  breakResults25_CS[2] = abs(breakIndexes25CS[1] - bAt25For_0_3n) / 25
-}
-
-if(breakIndexes25CS[3] > 0){
-  breakResults25_CS[3] = abs(breakIndexes25CS[3] - bAt25For_0_5n) / 25
-}
-
-if(breakIndexes25CS[4] > 0){
-  breakResults25_CS[4] = abs(breakIndexes25CS[4] - bAt25For_0_75n) / 25
-}
-
-# Calculating the error when n=100 (in terms of percent of total samples)
-if(breakIndexes100CS[1] > 0){
-  breakResults100_CS[1] = abs(breakIndexes100CS[1] - bAt100For_0_2n) / 100
-}
-
-if(breakIndexes100CS[2] > 0){
-  breakResults100_CS[2] = abs(breakIndexes100CS[2] - bAt100For_0_3n) / 100
-}
-
-if(breakIndexes100CS[3] > 0){
-  breakResults100_CS[3] = abs(breakIndexes100CS[3] - bAt100For_0_5n) / 100
-}
-
-if(breakIndexes100CS[4] > 0){
-  breakResults100_CS[4] = abs(breakIndexes100CS[4] - bAt100For_0_75n) / 100
-}
-
-# Calculating the error when n=200 (in terms of percent of total samples)
-if(breakIndexes200CS[1] > 0){
-  breakResults200_CS[1] = abs(breakIndexes200CS[1] - bAt200For_0_2n) / 200
-}
-
-if(breakIndexes200CS[2] > 0){
-  breakResults200_CS[2] = abs(breakIndexes200CS[2] - bAt200For_0_3n) / 200
-}
-
-if(breakIndexes200CS[3] > 0){
-  breakResults200_CS[3] = abs(breakIndexes200CS[3] - bAt200For_0_5n) / 200
-}
-
-if(breakIndexes200CS[4] > 0){
-  breakResults200_CS[4] = abs(breakIndexes200CS[4] - bAt200For_0_75n) / 200
-}
-
-breakResults.dataCS <- data.frame(
-  breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
-  nEquals25 = breakResults25_CS,
-  nEquals100 = breakResults100_CS,
-  nEquals200 = breakResults200_CS
-)
-
 ################################################################################
 ## Printing the output tables
 if(runLR == 1){
   print('Results for the Likelihood ratio')
   print(results.dataLR)
   
-  # Printing new line separator
-  writeLines('\r\n')
-  print("Percent error in detected break location for LR method")
-  print(breakResults.dataLR)
+  
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # Printing new line separator
+    writeLines('\r\n')
+    print("Percent error in detected break location for LR method")
+    print(breakResults.dataLR)
+  }
 
   # Printing new line separator
   writeLines('\r\n')
@@ -687,8 +774,15 @@ if(runLR == 1){
 if(runCUSUM == 1){
   print("Coverage probabilities for the CUSUM method")
   print(results.dataCS)
-  # Printing new line separator
-  writeLines('\r\n')
-  print("Percent error in detected break location for CUSUM method")
-  print(breakResults.dataCS)
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # Printing new line separator
+    writeLines('\r\n')
+    print("Percent error in detected break location for CUSUM method")
+    print(breakResults.dataCS)
+  }
+}
+# LEAVE THIS HERE UNTIL FEATURE IS IMPLEMENTED
+if(showCoverageProbabilityCurves == 1){
+  print('WARNING: The coverage probability curves feature is not implemented yet')
 }
