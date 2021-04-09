@@ -21,7 +21,7 @@ source('CUSUM/CUSUMBreakEstimator.R')
 param1 = 1.5
 param2 = 2.5
 # Number of simulations to perform
-numSims = 1000
+numSims = 5000
 
 # Seed for simulations (if set to 0, the seed is random, and any previously 
 # set seed is globally cleared)
@@ -32,7 +32,7 @@ curSeed = 0
 # to evaluate the amount of error caused by parametric mismatch
 lrParam1 = param1
 lrParam2 = param2
-significanceLevel = 0.04
+significanceLevel = 0.05
 # Whether to run LR calculation in this expirement or not
 runLR = 1
 
@@ -44,14 +44,14 @@ runCUSUM = 1
 
 ## Parameters defining the type of output the user wants to see
 # This will tell the code to either output the percent error in detected break locations, or not (1 to run, 0 to not)
-showBreakLocDetectAcc = 0
+showBreakLocDetectAcc = 1
 
 # This will tell the code to output coverage probability curves for the method (TODO: Implement this)
-showCoverageProbabilityCurves = 1
+showCoverageProbabilityCurves = 0
 # If the above variable is 1, then this variable will set the step size of the variable used to linearly interpolate the 
 # line of the coverage probability curve(as a fraction percent out of 1, i.e.
 # 0.1 would plot the score in intervals of 10% of the total sequence length)
-covProbParamStepSize = 0.05
+covProbParamStepSize = 0.04
 
 # Variable declarations
 ################################################################################
@@ -783,30 +783,47 @@ if(runCUSUM == 1){
     print(breakResults.dataCS)
   }
 }
-# LEAVE THIS HERE UNTIL FEATURE IS IMPLEMENTED
+# Plotting power graphs for the techniques
 if(showCoverageProbabilityCurves == 1){
-  ## Plotting psuedo code
-  # plot(test)
-  # lines(test)
   
   library(latex2exp)
   
   indexesToCalculate = seq(from=covProbParamStepSize, to=1-covProbParamStepSize, by=covProbParamStepSize)
   
   if(runLR==1){
+    n25_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
     n100_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
+    n200_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
   }
   
   if(runCUSUM==1){
+    n25_PlotResultsCS <- matrix(0, 1, length(indexesToCalculate))
     n100_PlotResultsCS <- matrix(0, 1, length(indexesToCalculate))
+    n200_PlotResultsCS <- matrix(0, 1, length(indexesToCalculate))
   }
   
   # Values for n = 100
   for (m in c(1:length(indexesToCalculate))){
-    # LR Plot generation
-    ## n = 100
+    # Method Plot generation
+    
+    ## n=25
     simLen <- 25
-    ### K=0.2n
+    breakLocs <- indexesToCalculate[m] * simLen
+    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+    if(runLR==1){
+      # Cusum Calc
+      retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+      # Grabbing the methods power
+      n25_PlotResultsLR[1,m] <- retVal[1]
+    }
+    if(runCUSUM==1){
+      retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+      # Grabbing the coverage probability
+      n25_PlotResultsCS[1,m] = retVal[1]
+    }
+    
+    ## n=100
+    simLen <- 100
     breakLocs <- indexesToCalculate[m] * simLen
     simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
     if(runLR==1){
@@ -820,23 +837,64 @@ if(showCoverageProbabilityCurves == 1){
       # Grabbing the coverage probability
       n100_PlotResultsCS[1,m] = retVal[1]
     }
+    
+    # Method Plot generation
+    ## n=200
+    simLen <- 200
+    breakLocs <- indexesToCalculate[m] * simLen
+    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+    if(runLR==1){
+      # Cusum Calc
+      retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+      # Grabbing the methods power
+      n200_PlotResultsLR[1,m] <- retVal[1]
+    }
+    if(runCUSUM==1){
+      retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+      # Grabbing the coverage probability
+      n200_PlotResultsCS[1,m] = retVal[1]
+    }
   }
+  # If both are here, then plot on the same graph, otherwise plot on seperate graphs
   if(runLR==1 && runCUSUM==1){
-    plot(indexesToCalculate,n100_PlotResultsLR[1,],xlim=c(0,1), ylim=c(0,0.03), col='blue',main=TeX('Power vs Break Index (n=25, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
-    lines(indexesToCalculate,n100_PlotResultsLR[1,], col='blue')
+    ## Actual plotting code for n=25
+    ylimits = c(0, max(c(n25_PlotResultsCS[1,], n25_PlotResultsLR[1,])) + mean(c(n25_PlotResultsCS[1,], n25_PlotResultsLR[1,])))
+    plot(100*indexesToCalculate,n25_PlotResultsLR[1,],xlim=c(0,100), ylim=ylimits, col='blue', pch=20, main=TeX('Power vs Break Index (n=25, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    lines(100*indexesToCalculate,n25_PlotResultsLR[1,], col='blue')
     par(new=TRUE)
-    plot(indexesToCalculate, n100_PlotResultsCS[1,],xlim=c(0,1), ylim=c(0,0.03),col='red',axes=FALSE, xlab='', ylab='')
-    lines(indexesToCalculate,n100_PlotResultsCS[1,], col='red')
+    plot(100*indexesToCalculate, n25_PlotResultsCS[1,],xlim=c(0,100), ylim=ylimits,col='red',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate,n25_PlotResultsCS[1,], col='red')
+    legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
+    
+    ## Actual plotting code for n=100
+    ylimits = c(0, max(c(n100_PlotResultsCS[1,], n100_PlotResultsLR[1,])) + mean(c(n100_PlotResultsCS[1,], n100_PlotResultsLR[1,])))
+    plot(100*indexesToCalculate,n100_PlotResultsLR[1,],xlim=c(0,100), ylim=c(0,1), col='blue', pch=20, main=TeX('Power vs Break Index (n=100, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    lines(100*indexesToCalculate,n100_PlotResultsLR[1,], col='blue')
+    par(new=TRUE)
+    plot(100*indexesToCalculate, n100_PlotResultsCS[1,],xlim=c(0,100), ylim=c(0,1),col='red',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate, n100_PlotResultsCS[1,], col='red')
+    legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
+    
+    ## Actual plotting code for n=200
+    ylimits = c(0, max(c(n200_PlotResultsCS[1,], n200_PlotResultsLR[1,])) + mean(c(n200_PlotResultsCS[1,], n200_PlotResultsLR[1,])))
+    plot(100*indexesToCalculate,n200_PlotResultsLR[1,],xlim=c(0,100), ylim=c(0,1), col='blue', pch=20, main=TeX('Power vs Break Index (n=200, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    lines(100*indexesToCalculate,n200_PlotResultsLR[1,], col='blue')
+    par(new=TRUE)
+    plot(100*indexesToCalculate, n200_PlotResultsCS[1,],xlim=c(0,100), ylim=c(0,1), col='red',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate,n200_PlotResultsCS[1,], col='red')
+    legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
   }
-  # else if(runLR==1){
-  if(runLR==1){
+  else if(runLR==1){
     ## Plotting the the power versus break index, and connecting the points with lines (LR Method)
     plot(n100_PlotResultsLR[1,], main=TeX('Power vs Break Index of LR Method (n=100, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
     lines(n100_PlotResultsLR[1,])
   }
-  # else if(runCUSUM==1){
-  if(runCUSUM==1){
+  else if(runCUSUM==1){
     plot(n100_PlotResultsCS[1,], main=TeX('Power vs Break Index of CUSUM Method (n=100, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
     lines(n100_PlotResultsCS[1,])
   }
+  
+  
+  
+  
 }
