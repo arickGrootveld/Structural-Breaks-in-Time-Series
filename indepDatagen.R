@@ -133,7 +133,7 @@ indepDatagen <- function(simLen, numSims, param1=0.1, param2=0.2, randomBreaks=F
     }else if(distFamily == "E"){
       # Exponential distribution
       simMatrix[i, 1:(breakLocs[i])] <- rexp(length(1:(breakLocs[i])), rate=param1)
-      simMatrix[i, ((breakLocs[i]+1):simLen)] <- rexp(length(((breakLocs[i]+1):simLen)), param2)
+      simMatrix[i, ((breakLocs[i]+1):simLen)] <- rexp(length(((breakLocs[i]+1):simLen)), rate=param2)
     }
   }
   return(simMatrix)

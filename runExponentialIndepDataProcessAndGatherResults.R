@@ -1,14 +1,18 @@
 
-## This script generates multiple datasets of independent normally 
+## This script generates multiple datasets of independent exponentially
 ## distributed data, with breaks at specified locations. The script
-## computes the ability of two methods to detect the pressence of these
+## computes the ability of two methods to detect the presence of these
 ## breaks: Likelihood Ratio, and CUSUM.
+
+## This code is effectively very similar to the runNormalDataProcessAndGatherResults
+## code, but with the exception that we use exponentially distributed data 
+## instead of normally distributed data
 
 # Importing datagen function
 source('indepDatagen.R')
 
 # Importing the Likelihood Ration function
-source('LikelihoodRatio/normalDataParametricLikelihood.R')
+source('LikelihoodRatio/exponentialDataParametricLikelihood.R')
 
 # Importing CUSUM calculation function
 source('CUSUM/CUSUMBreakEstimator.R')
@@ -21,7 +25,7 @@ source('CUSUM/CUSUMBreakEstimator.R')
 param1 = 1.5
 param2 = 2.5
 # Number of simulations to perform
-numSims = 1000
+numSims = 10000
 
 # Seed for simulations (if set to 0, the seed is random, and any previously 
 # set seed is globally cleared)
@@ -39,15 +43,15 @@ runLR = 1
 ## Parameters for the CUSUM
 criticalValueCS = 2.408
 longRunVariance = 1
-# Whether to run CUSUM calculations in this expirement or not
-runCUSUM = 1
+# Whether to run CUSUM calculations in this experiment or not
+runCUSUM = 0
 
 ## Parameters defining the type of output the user wants to see
 # This will tell the code to either output the percent error in detected break locations, or not (1 to run, 0 to not)
-showBreakLocDetectAcc = 1
+showBreakLocDetectAcc = 0
 
 # This will tell the code to output coverage probability curves for the method (TODO: Implement this)
-showCoverageProbabilityCurves = 1
+showCoverageProbabilityCurves = 0
 # If the above variable is 1, then this variable will set the step size of the variable used to linearly interpolate the 
 # line of the coverage probability curve(as a fraction percent out of 1, i.e.
 # 0.1 would plot the score in intervals of 10% of the total sequence length)
@@ -80,10 +84,10 @@ breakIndexes200CS = c(0,0,0,0)
 simLen <- 25
 ### K=0.2n
 breakLocs <- 0.2 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[1] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -122,11 +126,11 @@ if(runCUSUM==1){
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[2] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -165,11 +169,11 @@ if(runCUSUM==1){
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[3] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -208,10 +212,10 @@ if(runCUSUM==1){
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals25LR[4] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -253,11 +257,11 @@ if(runCUSUM==1){
 simLen <- 100
 ### K=0.2n
 breakLocs <- 0.2 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[1] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -295,11 +299,11 @@ if(runCUSUM==1){
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[2] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -337,11 +341,11 @@ if(runCUSUM==1){
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[3] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -379,11 +383,11 @@ if(runCUSUM==1){
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals100LR[4] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -424,11 +428,11 @@ if(runCUSUM==1){
 simLen <- 200
 ### K=0.2n
 breakLocs <- 0.2 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[1] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -465,11 +469,11 @@ if(runCUSUM==1){
 }
 ### K=0.3n
 breakLocs <- 0.3 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[2] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -507,11 +511,11 @@ if(runCUSUM==1){
 
 ### K=0.5n
 breakLocs <- 0.5 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[3] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -550,11 +554,11 @@ if(runCUSUM==1){
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
-simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
 # LR Calculation
 
 if(runLR==1){
-  retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+  retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
   nEquals200LR[4] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
@@ -768,7 +772,7 @@ if(runLR == 1){
     print("Percent error in detected break location for LR method")
     print(breakResults.dataLR)
   }
-
+  
   # Printing new line separator
   writeLines('\r\n')
 }
@@ -794,8 +798,6 @@ if(showCoverageProbabilityCurves == 1){
     n25_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
     n100_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
     n200_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
-    
-    # n25_BreakResultsLR <- matrix(0, 1, length(indexesToCalculate))
   }
   
   if(runCUSUM==1){
@@ -811,21 +813,12 @@ if(showCoverageProbabilityCurves == 1){
     ## n=25
     simLen <- 25
     breakLocs <- indexesToCalculate[m] * simLen
-    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
     if(runLR==1){
       # Cusum Calc
-      retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+      retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
       # Grabbing the methods power
       n25_PlotResultsLR[1,m] <- retVal[1]
-      if(showBreakLocDetectAcc){
-        intermediate <- retVal[-1]
-        if(length(intermediate[intermediate != -1]) > 0){
-          n25_BreakResultsLR[1, m] <- abs(mean(intermediate[intermediate != -1]) - round(breakLocs))/simLen
-        }else{
-          n25_BreakResultsLR[1, m] = 1
-        }
-        
-      }
     }
     if(runCUSUM==1){
       retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
@@ -836,10 +829,10 @@ if(showCoverageProbabilityCurves == 1){
     ## n=100
     simLen <- 100
     breakLocs <- indexesToCalculate[m] * simLen
-    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
     if(runLR==1){
       # Cusum Calc
-      retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+      retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
       # Grabbing the methods power
       n100_PlotResultsLR[1,m] <- retVal[1]
     }
@@ -853,10 +846,10 @@ if(showCoverageProbabilityCurves == 1){
     ## n=200
     simLen <- 200
     breakLocs <- indexesToCalculate[m] * simLen
-    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed)
+    simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
     if(runLR==1){
       # Cusum Calc
-      retVal = normalIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
+      retVal = expIndepLRCalc(lrParam1, lrParam2, simMatrix, alpha=significanceLevel)
       # Grabbing the methods power
       n200_PlotResultsLR[1,m] <- retVal[1]
     }
@@ -866,7 +859,7 @@ if(showCoverageProbabilityCurves == 1){
       n200_PlotResultsCS[1,m] = retVal[1]
     }
   }
-  # If both are here, then plot on the same graph, otherwise plot on seperate graphs
+  # If both are here, then plot on the same graph, otherwise plot on separate graphs
   if(runLR==1 && runCUSUM==1){
     ## Actual plotting code for n=25
     ylimits = c(0, max(c(n25_PlotResultsCS[1,], n25_PlotResultsLR[1,])) + mean(c(n25_PlotResultsCS[1,], n25_PlotResultsLR[1,])))
@@ -894,8 +887,6 @@ if(showCoverageProbabilityCurves == 1){
     plot(100*indexesToCalculate, n200_PlotResultsCS[1,],xlim=c(0,100), ylim=c(0,1), col='red',axes=FALSE, xlab='', ylab='', pch=20)
     lines(100*indexesToCalculate,n200_PlotResultsCS[1,], col='red')
     legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
-    
-    
   }
   else if(runLR==1){
     ## Plotting the the power versus break index, and connecting the points with lines (LR Method)
