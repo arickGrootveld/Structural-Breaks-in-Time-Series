@@ -14,7 +14,7 @@ CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
   detectedBreakIndexes = matrix(-1, 1, dim(simMatrix)[1])
   
   for(simNum in c(1:simDims[1])){
-    Dist <- simMatrix[simNum,] #A normal distribution where the mean changes from 5 to 7 at the 20th observation
+    Dist <- simMatrix[simNum,] # The target data to detect a break from
     Mn=0 #setting the maxtype stat to 0
     k=1 #Set k to 1 since we are checking all k's in the range {1,...,n}
     Ts=0 #Set the test statistic equal to 0 which we will compare to Mn
