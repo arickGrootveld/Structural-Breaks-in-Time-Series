@@ -43,3 +43,6 @@ lines(breaks, cumfreq0)
 
 inter.times <- diff(exp.data, lag=1)
 
+# Converting the data to a matrix format that will work nicely with our code
+realDataMatrix <- matrix(inter.times, nrow=1, ncol=length(inter.times))
+

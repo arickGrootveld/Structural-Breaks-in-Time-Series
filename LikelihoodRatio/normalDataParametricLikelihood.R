@@ -5,7 +5,7 @@
 # v1.0.2
 # Contributors: Andrea Scolari, Arick Grootveld
 #############################################################################
-normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
+normalIndepLRCalc <- function(simMatrix, alpha=0.05){
   # Calculated parameters to be used for the simulation
   criticalValue = -log(-0.5*log(1-alpha))
   
@@ -42,21 +42,19 @@ normalIndepLRCalc <- function(param1, param2, simMatrix, alpha=0.05){
       after <- simSeq[(i+1):(simSeqLen)]
       
       # Calculating the probablities of each of the samples being from the before distribution
-      beforePdf1 <- prod(dnorm(before, mean=param1, sd=1))
-      beforePdf2 <- prod(dnorm(before, mean=param2, sd=1))
+      beforePdf <- prod(dnorm(before, mean=mean(before), sd=1))
       
       # Calculating the probabilities of each of the samples from the after distribution
-      afterPdf1 <- prod(dnorm(after, mean=param1, sd=1))
-      afterPdf2 <- prod(dnorm(after, mean=param2, sd=1))
+      afterPdf <- prod(dnorm(after, mean=mean(after), sd=1))
       
       # Probability break was from dist1 to dist2, or from dist2 to dist1
-      option1 <- beforePdf1 * afterPdf2
-      option2 <- beforePdf2 * afterPdf1
+      # option1 <- beforePdf1 * afterPdf2
+      # option2 <- beforePdf2 * afterPdf1
       
       # Whichever one is larger of the posibilities is the denominator of the
       # likelihood ratio at this location
       #denominators[i] <- max(c(option1, option2))
-      denominators[i] <- option1
+      denominators[i] <- beforePdf * afterPdf
     }
     
     ## No longer relevant

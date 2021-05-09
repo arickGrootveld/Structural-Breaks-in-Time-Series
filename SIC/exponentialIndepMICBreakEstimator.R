@@ -1,11 +1,11 @@
-############################ exponentialIndepSICBreakEstimator.R ############
-# Function to calculate SIC, for detecting statistical breaks
-# in exponentially distributed independent data
+############################ exponentialIndepMICBreakEstimator.R ############
+# Function to calculate Modified Swartz Information Criterion, for detecting
+# statistical breaks in exponentially distributed independent data
 #
 # v1.0.0
 # Contributors: Andrea Scolari, Arick Grootveld, Ramadha Piyadi Gamage
 #############################################################################
-expIndepSICCalc <- function(simMatrix, alpha=0.05){
+expIndepMICCalc <- function(simMatrix, alpha=0.05){
   # Calculated parameters to be used for the simulation
   simDims = dim(simMatrix)
   
@@ -21,9 +21,9 @@ expIndepSICCalc <- function(simMatrix, alpha=0.05){
   
   # Calculatings for the critical value, as provided by Ramadha Piyadi Gamage
   d <- 1 # d is the number of (unknown) parameters to be estimated
-  a.n <- sqrt(2*log(log(simDims[2])))
-  b.n <- a.n^2 + 0.5*log(log(log(simDims[2]))) - log(gamma(d/2))
-  criticalValue <- ((-1/a.n)*log(log((1-alpha + exp(-2*exp(b.n)))^(-0.5))) + (b.n/a.n))^2 - 2*log(simDims[2])
+  # Critical value is calculated as the right-tailed value of a chi-squared dist.
+  # based on theoretically derived values
+  criticalValue <- qchisq(p=1-alpha, df=d)
   
   # For loop through all simulations
   for (simNum in c(1:simDims[1])){
@@ -32,28 +32,28 @@ expIndepSICCalc <- function(simMatrix, alpha=0.05){
     
     # Filling the SIC1 array with INF values, so that we don't select any of the
     # default values when calculating the test statistic
-    SIC1 <- rep(Inf, length(simSeq))
+    MIC <- rep(-Inf, length(simSeq))
     
     # The current simulation
-    simSeqLen = length(simSeq)
+    n = length(simSeq)
     
-    SIC0 <- 2*simSeqLen + 2*simSeqLen*log(mean(simSeq))+log(simSeqLen)
+    MIC0 <- 2*n + 2*n*log(mean(simSeq))+log(n)
     
     # For loop through each index of potential break
-    for (i in c(2:(simSeqLen-2))){
+    for (k in c(2:(n-2))){
       # Grabbing the sequence from before where we think the break happened
-      before <- simSeq[1:i]
+      before <- simSeq[1:k]
       # Grabbing the sequence from after the location the break happened
-      after <- simSeq[(i+1):(simSeqLen)]
+      after <- simSeq[(k+1):(n)]
       
-      SIC1[i] <- 2*simSeqLen + 2*i * log(mean(before)) + 2*(simSeqLen-i) * log(mean(after)) + 2*log(simSeqLen)
+      # MIC1[k] <- 2*n + 2*k * log(mean(before)) + 2*(n-i) * log(mean(after)) + (1+((2*i/n) - 1)^2) * log(n)
+      MIC[k] <- 2* (n*log(mean(simSeq)) - k*log(mean(before)) - (n-k)*log(mean(after))) - (((2*k/n) - 1)^2) * log(n) - log(n)
     }
     
-    breakLoc <- which.min(SIC1)
+    breakLoc <- which.max(MIC)
     
-    testStatistic[1, simNum] <- SIC0 - min(SIC1)
-    print(SIC0)
-    print(min(SIC1))
+    # testStatistic[1, simNum] <- MIC0 - min(MIC1) + log(n)
+    testStatistic[1,simNum] <- max(MIC)
     
     # If our test statistic is NaN, then we want to reject
     # This only happens if the maximal LR is negative
