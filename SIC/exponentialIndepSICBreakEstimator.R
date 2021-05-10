@@ -52,8 +52,6 @@ expIndepSICCalc <- function(simMatrix, alpha=0.05){
     breakLoc <- which.min(SIC1)
     
     testStatistic[1, simNum] <- SIC0 - min(SIC1)
-    print(SIC0)
-    print(min(SIC1))
     
     # If our test statistic is NaN, then we want to reject
     # This only happens if the maximal LR is negative

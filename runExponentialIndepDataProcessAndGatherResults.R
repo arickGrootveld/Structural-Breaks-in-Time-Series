@@ -2,7 +2,7 @@
 ## This script generates multiple datasets of independent exponentially
 ## distributed data, with breaks at specified locations. The script
 ## computes the ability of two methods to detect the presence of these
-## breaks: Likelihood Ratio, and CUSUM.
+## breaks: Likelihood Ratio, and SIC.
 
 ## This code is effectively very similar to the runNormalDataProcessAndGatherResults
 ## code, but with the exception that we use exponentially distributed data 
@@ -14,41 +14,38 @@ source('indepDatagen.R')
 # Importing the Likelihood Ration function
 source('LikelihoodRatio/exponentialDataParametricLikelihood.R')
 
-# Importing CUSUM calculation function
-source('CUSUM/CUSUMBreakEstimator.R')
+# Importing SIC and MIC calculation functions
+source('SIC/exponentialIndepSICBreakEstimator.R')
+source('SIC/exponentialIndepMICBreakEstimator.R')
 
 # Initializing variables
 
 # Modifiable Parameters
 ################################################################################
 # Difference in mean between distributions
-param1 = 1.5
-param2 = 1.5
+param1 = 0.5
+param2 = 1
 # Number of simulations to perform
-numSims = 1000
+numSims = 5000
 
 # Seed for simulations (if set to 0, the seed is random, and any previously 
 # set seed is globally cleared)
 curSeed = 0
 
-## Parameters for the Likelihood ratio
-# lr params set to the simulation params to improve accuracy, but can be adjusted
-# to evaluate the amount of error caused by parametric mismatch
-lrParam1 = param1
-lrParam2 = param2
+## Parameters for the Likelihood ratio, SIC and MIC algs.
 significanceLevel = 0.05
 # Whether to run LR calculation in this expirement or not
 runLR = 1
 
-## Parameters for the CUSUM
-criticalValueCS = 2.408
-longRunVariance = 1
-# Whether to run CUSUM calculations in this experiment or not
-runCUSUM = 0
+# Whether to run SIC calculations in this experiment or not
+runSIC = 1
+
+# Whether to run MIC calculations in this experiment or not
+runMIC = 1
 
 ## Parameters defining the type of output the user wants to see
 # This will tell the code to either output the percent error in detected break locations, or not (1 to run, 0 to not)
-showBreakLocDetectAcc = 0
+showBreakLocDetectAcc = 1
 
 # This will tell the code to output coverage probability curves for the method (TODO: Implement this)
 showCoverageProbabilityCurves = 0
@@ -57,25 +54,38 @@ showCoverageProbabilityCurves = 0
 # 0.1 would plot the score in intervals of 10% of the total sequence length)
 covProbParamStepSize = 0.04
 
+# This variables dictates whether a parameter sweep graph is generated as 
+# per page 316 of the paper: "The Likelihood Ratio Test for the change point 
+# problem with exponentially distributed random variables"
+showParamSweepPlotting = 1
+
 # Variable declarations
 ################################################################################
-## Arrays to store results of likelihood ratio and CUSUM calculations
+## Arrays to store results of likelihood ratio and SIC calculations
 nEquals30LR = c(0,0,0,0)
 nEquals100LR = c(0,0,0,0)
 nEquals200LR = c(0,0,0,0)
 
-nEquals30CS = c(0,0,0,0)
-nEquals100CS = c(0,0,0,0)
-nEquals200CS = c(0,0,0,0)
+nEquals30SIC = c(0,0,0,0)
+nEquals100SIC = c(0,0,0,0)
+nEquals200SIC = c(0,0,0,0)
+
+nEquals30MIC = c(0,0,0,0)
+nEquals100MIC = c(0,0,0,0)
+nEquals200MIC = c(0,0,0,0)
 
 ## Variables to store the average break location detected for each technique
 breakIndexes30LR = c(0, 0, 0, 0)
 breakIndexes100LR = c(0, 0, 0, 0)
 breakIndexes200LR = c(0, 0, 0, 0) 
 
-breakIndexes30CS = c(0,0,0,0)
-breakIndexes100CS = c(0,0,0,0)
-breakIndexes200CS = c(0,0,0,0)
+breakIndexes30SIC = c(0,0,0,0)
+breakIndexes100SIC = c(0,0,0,0)
+breakIndexes200SIC = c(0,0,0,0)
+
+breakIndexes30MIC = c(0,0,0,0)
+breakIndexes100MIC = c(0,0,0,0)
+breakIndexes200MIC = c(0,0,0,0)
 
 
 # Performing simulations
@@ -103,11 +113,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals30CS[1] = retVal[1]
+  nEquals30SIC[1] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -116,13 +126,32 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes30CS[1] = mean(indexesOfDetectedBreaks)
+      breakIndexes30SIC[1] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes30CS[1] = -1
+      breakIndexes30SIC[1] = -1
     }
   }
 }
 
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals30MIC[1] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes30MIC[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes30MIC[1] = -1
+    }
+  }
+}
 
 ### K=0.3n
 breakLocs <- 0.3 * simLen
@@ -146,11 +175,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals30CS[2] = retVal[1]
+  nEquals30SIC[2] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -159,19 +188,39 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes30CS[2] = mean(indexesOfDetectedBreaks)
+      breakIndexes30SIC[2] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes30CS[2] = -1
+      breakIndexes30SIC[2] = -1
     }
   }
 }
 
 
+if(runMIC==1){
+  # SIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals30MIC[2] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes30MIC[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes30MIC[2] = -1
+    }
+  }
+}
+
 ### K=0.5n
 breakLocs <- 0.5 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
-# LR Calculation
 
+# LR Calculation
 if(runLR==1){
   retVal = expIndepLRCalc(simMatrix, alpha=significanceLevel)
   nEquals30LR[3] = retVal[1]
@@ -189,11 +238,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals30CS[3] = retVal[1]
+  nEquals30SIC[3] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -202,13 +251,33 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes30CS[3] = mean(indexesOfDetectedBreaks)
+      breakIndexes30SIC[3] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes30CS[3] = -1
+      breakIndexes30SIC[3] = -1
     }
   }
 }
 
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals30MIC[3] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes30MIC[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes30MIC[3] = -1
+    }
+  }
+}
 
 ### K=0.75n
 breakLocs <- 0.75 * simLen
@@ -231,11 +300,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals30CS[4] = retVal[1]
+  nEquals30SIC[4] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -244,13 +313,33 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes30CS[4] = mean(indexesOfDetectedBreaks)
+      breakIndexes30SIC[4] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes30CS[4] = -1
+      breakIndexes30SIC[4] = -1
     }
   }
 }
 
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals30MIC[4] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes30MIC[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes30MIC[4] = -1
+    }
+  }
+}
 
 ################################################################################
 ## n = 100
@@ -277,11 +366,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals100CS[1] = retVal[1]
+  nEquals100SIC[1] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -290,9 +379,29 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes100CS[1] = mean(indexesOfDetectedBreaks)
+      breakIndexes100SIC[1] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes100CS[1] = -1
+      breakIndexes100SIC[1] = -1
+    }
+  }
+}
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals100MIC[1] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100MIC[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100MIC[1] = -1
     }
   }
 }
@@ -319,11 +428,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals100CS[2] = retVal[1]
+  nEquals100SIC[2] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -332,9 +441,30 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes100CS[2] = mean(indexesOfDetectedBreaks)
+      breakIndexes100SIC[2] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes100CS[2] = -1
+      breakIndexes100SIC[2] = -1
+    }
+  }
+}
+
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals100MIC[2] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100MIC[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100MIC[2] = -1
     }
   }
 }
@@ -361,11 +491,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals100CS[3] = retVal[1]
+  nEquals100SIC[3] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -374,9 +504,30 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes100CS[3] = mean(indexesOfDetectedBreaks)
+      breakIndexes100SIC[3] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes100CS[3] = -1
+      breakIndexes100SIC[3] = -1
+    }
+  }
+}
+
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals100MIC[3] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100MIC[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100MIC[3] = -1
     }
   }
 }
@@ -403,11 +554,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals100CS[4] = retVal[1]
+  nEquals100SIC[4] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -416,9 +567,30 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes100CS[4] = mean(indexesOfDetectedBreaks)
+      breakIndexes100SIC[4] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes100CS[4] = -1
+      breakIndexes100SIC[4] = -1
+    }
+  }
+}
+
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals100MIC[4] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes100MIC[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes100MIC[4] = -1
     }
   }
 }
@@ -448,11 +620,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals200CS[1] = retVal[1]
+  nEquals200SIC[1] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -461,12 +633,35 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes200CS[1] = mean(indexesOfDetectedBreaks)
+      breakIndexes200SIC[1] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes200CS[1] = -1
+      breakIndexes200SIC[1] = -1
     }
   }
 }
+
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals200MIC[1] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200MIC[1] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200MIC[1] = -1
+    }
+  }
+}
+
+
 ### K=0.3n
 breakLocs <- 0.3 * simLen
 simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
@@ -489,11 +684,11 @@ if(runLR==1){
   }
 }
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals200CS[2] = retVal[1]
+  nEquals200SIC[2] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -502,9 +697,30 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes200CS[2] = mean(indexesOfDetectedBreaks)
+      breakIndexes200SIC[2] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes200CS[2] = -1
+      breakIndexes200SIC[2] = -1
+    }
+  }
+}
+
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals200MIC[2] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200MIC[2] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200MIC[2] = -1
     }
   }
 }
@@ -532,11 +748,11 @@ if(runLR==1){
 }
 
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals200CS[3] = retVal[1]
+  nEquals200SIC[3] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -545,9 +761,30 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes200CS[3] = mean(indexesOfDetectedBreaks)
+      breakIndexes200SIC[3] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes200CS[3] = -1
+      breakIndexes200SIC[3] = -1
+    }
+  }
+}
+
+
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals200MIC[3] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200MIC[3] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200MIC[3] = -1
     }
   }
 }
@@ -575,11 +812,11 @@ if(runLR==1){
 }
 
 
-if(runCUSUM==1){
-  # Cusum Calc
-  retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+if(runSIC==1){
+  # SIC Calc
+  retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
   # Grabbing the coverage probability
-  nEquals200CS[4] = retVal[1]
+  nEquals200SIC[4] = retVal[1]
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # If we detected at least one break then we can get an estimate of the break index
@@ -588,16 +825,36 @@ if(runCUSUM==1){
       indexesOfDetectedBreaks = retVal[-1]
       # Removing indexes where a break wasn't detected
       indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
-      breakIndexes200CS[4] = mean(indexesOfDetectedBreaks)
+      breakIndexes200SIC[4] = mean(indexesOfDetectedBreaks)
     }else{
-      breakIndexes200CS[4] = -1
+      breakIndexes200SIC[4] = -1
     }
   }
 }
 
 
+if(runMIC==1){
+  # MIC Calc
+  retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+  # Grabbing the coverage probability
+  nEquals200MIC[4] = retVal[1]
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # If we detected at least one break then we can get an estimate of the break index
+    if(retVal[1] > 0){
+      # Calculating the average index of detected break
+      indexesOfDetectedBreaks = retVal[-1]
+      # Removing indexes where a break wasn't detected
+      indexesOfDetectedBreaks = indexesOfDetectedBreaks[indexesOfDetectedBreaks != -1]
+      breakIndexes200MIC[4] = mean(indexesOfDetectedBreaks)
+    }else{
+      breakIndexes200MIC[4] = -1
+    }
+  }
+}
+
 ################################################################################
-## Constructing the output table for Likelihood Ratio and CUSUM
+## Constructing the output table for Likelihood Ratio and SIC
 results.dataLR <- data.frame(
   breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
   nEquals30 = nEquals30LR,
@@ -605,11 +862,19 @@ results.dataLR <- data.frame(
   nEquals200 = nEquals200LR
 )
 
-results.dataCS <- data.frame(
+results.dataSIC <- data.frame(
   breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
-  nEquals30 = nEquals30CS,
-  nEquals100 = nEquals100CS,
-  nEquals200 = nEquals200CS
+  nEquals30 = nEquals30SIC,
+  nEquals100 = nEquals100SIC,
+  nEquals200 = nEquals200SIC
+)
+
+
+results.dataMIC <- data.frame(
+  breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
+  nEquals30 = nEquals30MIC,
+  nEquals100 = nEquals100MIC,
+  nEquals200 = nEquals200MIC
 )
 
 ## Constructing the output table for the detected break locations
@@ -695,68 +960,133 @@ if(showBreakLocDetectAcc == 1){
   )
   
   
-  ## Calculating the error of the CUSUM's break location detection
-  breakResults30_CS = c(-1,-1,-1,-1)
-  breakResults100_CS = c(-1, -1, -1, -1)
-  breakResults200_CS = c(-1,-1,-1,-1)
+  ## Calculating the error of the SIC's break location detection
+  breakResults30_SIC = c(-1,-1,-1,-1)
+  breakResults100_SIC = c(-1, -1, -1, -1)
+  breakResults200_SIC = c(-1,-1,-1,-1)
   # Calculating the error when n=30 (in terms of percent of total samples)
   # If a break was detected we can do the calculation, otherwise we leave it as -1
-  if(breakIndexes30CS[1] > 0){
-    breakResults30_CS[1] = 100 * abs(breakIndexes30CS[1] - bAt30For_0_2n) / 30
+  if(breakIndexes30SIC[1] > 0){
+    breakResults30_SIC[1] = 100 * abs(breakIndexes30SIC[1] - bAt30For_0_2n) / 30
   }
   
-  if(breakIndexes30CS[2] > 0){
-    breakResults30_CS[2] = 100 * abs(breakIndexes30CS[1] - bAt30For_0_3n) / 30
+  if(breakIndexes30SIC[2] > 0){
+    breakResults30_SIC[2] = 100 * abs(breakIndexes30SIC[1] - bAt30For_0_3n) / 30
   }
   
-  if(breakIndexes30CS[3] > 0){
-    breakResults30_CS[3] = 100 * abs(breakIndexes30CS[3] - bAt30For_0_5n) / 30
+  if(breakIndexes30SIC[3] > 0){
+    breakResults30_SIC[3] = 100 * abs(breakIndexes30SIC[3] - bAt30For_0_5n) / 30
   }
   
-  if(breakIndexes30CS[4] > 0){
-    breakResults30_CS[4] = 100 * abs(breakIndexes30CS[4] - bAt30For_0_75n) / 30
+  if(breakIndexes30SIC[4] > 0){
+    breakResults30_SIC[4] = 100 * abs(breakIndexes30SIC[4] - bAt30For_0_75n) / 30
   }
   
   # Calculating the error when n=100 (in terms of percent of total samples)
-  if(breakIndexes100CS[1] > 0){
-    breakResults100_CS[1] = 100 * abs(breakIndexes100CS[1] - bAt100For_0_2n) / 100
+  if(breakIndexes100SIC[1] > 0){
+    breakResults100_SIC[1] = 100 * abs(breakIndexes100SIC[1] - bAt100For_0_2n) / 100
   }
   
-  if(breakIndexes100CS[2] > 0){
-    breakResults100_CS[2] = 100 * abs(breakIndexes100CS[2] - bAt100For_0_3n) / 100
+  if(breakIndexes100SIC[2] > 0){
+    breakResults100_SIC[2] = 100 * abs(breakIndexes100SIC[2] - bAt100For_0_3n) / 100
   }
   
-  if(breakIndexes100CS[3] > 0){
-    breakResults100_CS[3] = 100 * abs(breakIndexes100CS[3] - bAt100For_0_5n) / 100
+  if(breakIndexes100SIC[3] > 0){
+    breakResults100_SIC[3] = 100 * abs(breakIndexes100SIC[3] - bAt100For_0_5n) / 100
   }
   
-  if(breakIndexes100CS[4] > 0){
-    breakResults100_CS[4] = 100 * abs(breakIndexes100CS[4] - bAt100For_0_75n) / 100
+  if(breakIndexes100SIC[4] > 0){
+    breakResults100_SIC[4] = 100 * abs(breakIndexes100SIC[4] - bAt100For_0_75n) / 100
   }
   
   # Calculating the error when n=200 (in terms of percent of total samples)
-  if(breakIndexes200CS[1] > 0){
-    breakResults200_CS[1] = 100 * abs(breakIndexes200CS[1] - bAt200For_0_2n) / 200
+  if(breakIndexes200SIC[1] > 0){
+    breakResults200_SIC[1] = 100 * abs(breakIndexes200SIC[1] - bAt200For_0_2n) / 200
   }
   
-  if(breakIndexes200CS[2] > 0){
-    breakResults200_CS[2] = 100 * abs(breakIndexes200CS[2] - bAt200For_0_3n) / 200
+  if(breakIndexes200SIC[2] > 0){
+    breakResults200_SIC[2] = 100 * abs(breakIndexes200SIC[2] - bAt200For_0_3n) / 200
   }
   
-  if(breakIndexes200CS[3] > 0){
-    breakResults200_CS[3] = 100 * abs(breakIndexes200CS[3] - bAt200For_0_5n) / 200
+  if(breakIndexes200SIC[3] > 0){
+    breakResults200_SIC[3] = 100 * abs(breakIndexes200SIC[3] - bAt200For_0_5n) / 200
   }
   
-  if(breakIndexes200CS[4] > 0){
-    breakResults200_CS[4] = 100 * abs(breakIndexes200CS[4] - bAt200For_0_75n) / 200
+  if(breakIndexes200SIC[4] > 0){
+    breakResults200_SIC[4] = 100 * abs(breakIndexes200SIC[4] - bAt200For_0_75n) / 200
   }
   
-  breakResults.dataCS <- data.frame(
+  breakResults.dataSIC <- data.frame(
     breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
-    nEquals30 = breakResults30_CS,
-    nEquals100 = breakResults100_CS,
-    nEquals200 = breakResults200_CS
+    nEquals30 = breakResults30_SIC,
+    nEquals100 = breakResults100_SIC,
+    nEquals200 = breakResults200_SIC
   )
+  
+  
+  ## Calculating the error of the MIC's break location detection
+  breakResults30_MIC = c(-1,-1,-1,-1)
+  breakResults100_MIC = c(-1, -1, -1, -1)
+  breakResults200_MIC = c(-1,-1,-1,-1)
+  # Calculating the error when n=30 (in terms of percent of total samples)
+  # If a break was detected we can do the calculation, otherwise we leave it as -1
+  if(breakIndexes30MIC[1] > 0){
+    breakResults30_MIC[1] = 100 * abs(breakIndexes30MIC[1] - bAt30For_0_2n) / 30
+  }
+  
+  if(breakIndexes30MIC[2] > 0){
+    breakResults30_MIC[2] = 100 * abs(breakIndexes30MIC[1] - bAt30For_0_3n) / 30
+  }
+  
+  if(breakIndexes30MIC[3] > 0){
+    breakResults30_MIC[3] = 100 * abs(breakIndexes30MIC[3] - bAt30For_0_5n) / 30
+  }
+  
+  if(breakIndexes30MIC[4] > 0){
+    breakResults30_MIC[4] = 100 * abs(breakIndexes30MIC[4] - bAt30For_0_75n) / 30
+  }
+  
+  # Calculating the error when n=100 (in terms of percent of total samples)
+  if(breakIndexes100MIC[1] > 0){
+    breakResults100_MIC[1] = 100 * abs(breakIndexes100MIC[1] - bAt100For_0_2n) / 100
+  }
+  
+  if(breakIndexes100MIC[2] > 0){
+    breakResults100_MIC[2] = 100 * abs(breakIndexes100MIC[2] - bAt100For_0_3n) / 100
+  }
+  
+  if(breakIndexes100MIC[3] > 0){
+    breakResults100_MIC[3] = 100 * abs(breakIndexes100MIC[3] - bAt100For_0_5n) / 100
+  }
+  
+  if(breakIndexes100MIC[4] > 0){
+    breakResults100_MIC[4] = 100 * abs(breakIndexes100MIC[4] - bAt100For_0_75n) / 100
+  }
+  
+  # Calculating the error when n=200 (in terms of percent of total samples)
+  if(breakIndexes200MIC[1] > 0){
+    breakResults200_MIC[1] = 100 * abs(breakIndexes200MIC[1] - bAt200For_0_2n) / 200
+  }
+  
+  if(breakIndexes200MIC[2] > 0){
+    breakResults200_MIC[2] = 100 * abs(breakIndexes200MIC[2] - bAt200For_0_3n) / 200
+  }
+  
+  if(breakIndexes200MIC[3] > 0){
+    breakResults200_MIC[3] = 100 * abs(breakIndexes200MIC[3] - bAt200For_0_5n) / 200
+  }
+  
+  if(breakIndexes200MIC[4] > 0){
+    breakResults200_MIC[4] = 100 * abs(breakIndexes200MIC[4] - bAt200For_0_75n) / 200
+  }
+  
+  breakResults.dataMIC <- data.frame(
+    breakLocs = c("K=0.2n", "K=0.3n", "K=0.5n", "K=0.75n"),
+    nEquals30 = breakResults30_MIC,
+    nEquals100 = breakResults100_MIC,
+    nEquals200 = breakResults200_MIC
+  )
+  
 }
 ################################################################################
 ## Printing the output tables
@@ -776,17 +1106,31 @@ if(runLR == 1){
   # Printing new line separator
   writeLines('\r\n')
 }
-if(runCUSUM == 1){
-  print("Coverage probabilities for the CUSUM method")
-  print(results.dataCS)
+if(runSIC == 1){
+  print("Coverage probabilities for the SIC method")
+  print(results.dataSIC)
   # Only running if we want to calculate the break location detection accuracy
   if(showBreakLocDetectAcc == 1){
     # Printing new line separator
     writeLines('\r\n')
-    print("Percent error in detected break location for CUSUM method")
-    print(breakResults.dataCS)
+    print("Percent error in detected break location for SIC method")
+    print(breakResults.dataSIC)
   }
 }
+
+if(runMIC == 1){
+  print("Coverage probabilities for the MIC method")
+  print(results.dataMIC)
+  # Only running if we want to calculate the break location detection accuracy
+  if(showBreakLocDetectAcc == 1){
+    # Printing new line separator
+    writeLines('\r\n')
+    print("Percent error in detected break location for MIC method")
+    print(breakResults.dataMIC)
+  }
+}
+
+
 # Plotting power graphs for the techniques
 if(showCoverageProbabilityCurves == 1){
   
@@ -800,10 +1144,16 @@ if(showCoverageProbabilityCurves == 1){
     n200_PlotResultsLR <- matrix(0, 1,length(indexesToCalculate))
   }
   
-  if(runCUSUM==1){
-    n30_PlotResultsCS <- matrix(0, 1, length(indexesToCalculate))
-    n100_PlotResultsCS <- matrix(0, 1, length(indexesToCalculate))
-    n200_PlotResultsCS <- matrix(0, 1, length(indexesToCalculate))
+  if(runSIC==1){
+    n30_PlotResultsSIC <- matrix(0, 1, length(indexesToCalculate))
+    n100_PlotResultsSIC <- matrix(0, 1, length(indexesToCalculate))
+    n200_PlotResultsSIC <- matrix(0, 1, length(indexesToCalculate))
+  }
+  
+  if(runMIC==1){
+    n30_PlotResultsMIC <- matrix(0, 1, length(indexesToCalculate))
+    n100_PlotResultsMIC <- matrix(0, 1, length(indexesToCalculate))
+    n200_PlotResultsMIC <- matrix(0, 1, length(indexesToCalculate))
   }
   
   # Values for n = 100
@@ -815,15 +1165,20 @@ if(showCoverageProbabilityCurves == 1){
     breakLocs <- indexesToCalculate[m] * simLen
     simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
     if(runLR==1){
-      # Cusum Calc
+      # SIC Calc
       retVal = expIndepLRCalc(simMatrix, alpha=significanceLevel)
       # Grabbing the methods power
       n30_PlotResultsLR[1,m] <- retVal[1]
     }
-    if(runCUSUM==1){
-      retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+    if(runSIC==1){
+      retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
       # Grabbing the coverage probability
-      n30_PlotResultsCS[1,m] = retVal[1]
+      n30_PlotResultsSIC[1,m] = retVal[1]
+    }
+    if(runMIC==1){
+      retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+      # Grabbing the coverage probability
+      n30_PlotResultsMIC[1,m] = retVal[1]
     }
     
     ## n=100
@@ -831,15 +1186,20 @@ if(showCoverageProbabilityCurves == 1){
     breakLocs <- indexesToCalculate[m] * simLen
     simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
     if(runLR==1){
-      # Cusum Calc
+      # SIC Calc
       retVal = expIndepLRCalc(simMatrix, alpha=significanceLevel)
       # Grabbing the methods power
       n100_PlotResultsLR[1,m] <- retVal[1]
     }
-    if(runCUSUM==1){
-      retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+    if(runSIC==1){
+      retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
       # Grabbing the coverage probability
-      n100_PlotResultsCS[1,m] = retVal[1]
+      n100_PlotResultsSIC[1,m] = retVal[1]
+    }
+    if(runMIC==1){
+      retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+      # Grabbing the coverage probability
+      n100_PlotResultsMIC[1,m] = retVal[1]
     }
     
     # Method Plot generation
@@ -848,57 +1208,71 @@ if(showCoverageProbabilityCurves == 1){
     breakLocs <- indexesToCalculate[m] * simLen
     simMatrix <- indepDatagen(simLen=simLen, numSims=numSims, breakLocations=breakLocs, param1=param1, param2=param2, seed=curSeed, distFamily='E')
     if(runLR==1){
-      # Cusum Calc
+      # SIC Calc
       retVal = expIndepLRCalc(simMatrix, alpha=significanceLevel)
       # Grabbing the methods power
       n200_PlotResultsLR[1,m] <- retVal[1]
     }
-    if(runCUSUM==1){
-      retVal = CUSUMCalc(simMatrix, critVal=criticalValueCS, longRunVar=longRunVariance)
+    if(runSIC==1){
+      retVal = expIndepSICCalc(simMatrix, alpha=significanceLevel)
       # Grabbing the coverage probability
-      n200_PlotResultsCS[1,m] = retVal[1]
+      n200_PlotResultsSIC[1,m] = retVal[1]
+    }
+    if(runMIC==1){
+      retVal = expIndepMICCalc(simMatrix, alpha=significanceLevel)
+      # Grabbing the coverage probability
+      n200_PlotResultsMIC[1,m] = retVal[1]
     }
   }
-  # If both are here, then plot on the same graph, otherwise plot on separate graphs
-  if(runLR==1 && runCUSUM==1){
+  # If all three are here, then plot on the same graph, otherwise plot on separate graphs
+  if(runLR==1 && runSIC==1 && runMIC){
     ## Actual plotting code for n=30
-    ylimits = c(0, max(c(n30_PlotResultsCS[1,], n30_PlotResultsLR[1,])) + mean(c(n30_PlotResultsCS[1,], n30_PlotResultsLR[1,])))
-    plot(100*indexesToCalculate,n30_PlotResultsLR[1,],xlim=c(0,100), ylim=ylimits, col='blue', pch=20, main=TeX('Power vs Break Index (n=30, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    ylimits = c(0, max(c(n30_PlotResultsSIC[1,], n30_PlotResultsLR[1,])) + mean(c(n30_PlotResultsSIC[1,], n30_PlotResultsLR[1,])))
+    plot(100*indexesToCalculate,n30_PlotResultsLR[1,],xlim=c(0,100), ylim=ylimits, col='blue', pch=20, main=TeX(paste('Power vs Break Index (n=30, $\\theta_1 = ', toString(param1), '$, $\\theta_2=', toString(param2), '$)')), ylab="Empirical Power", xlab="Break Index %")
     lines(100*indexesToCalculate,n30_PlotResultsLR[1,], col='blue')
     par(new=TRUE)
-    plot(100*indexesToCalculate, n30_PlotResultsCS[1,],xlim=c(0,100), ylim=ylimits,col='red',axes=FALSE, xlab='', ylab='', pch=20)
-    lines(100*indexesToCalculate,n30_PlotResultsCS[1,], col='red')
-    legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
+    plot(100*indexesToCalculate, n30_PlotResultsSIC[1,],xlim=c(0,100), ylim=ylimits,col='red',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate,n30_PlotResultsSIC[1,], col='red')
+    par(new=TRUE)
+    plot(100*indexesToCalculate, n30_PlotResultsMIC[1,],xlim=c(0,100), ylim=ylimits,col='green',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate,n30_PlotResultsMIC[1,], col='green')
+    legend('topleft', c('Likelihood Ratio', 'SIC', 'MIC'), col=c('blue', 'red', 'green'), lty=c(1,1,1), cex=0.8)
     
     ## Actual plotting code for n=100
-    ylimits = c(0, max(c(n100_PlotResultsCS[1,], n100_PlotResultsLR[1,])) + mean(c(n100_PlotResultsCS[1,], n100_PlotResultsLR[1,])))
-    plot(100*indexesToCalculate,n100_PlotResultsLR[1,],xlim=c(0,100), ylim=c(0,1), col='blue', pch=20, main=TeX('Power vs Break Index (n=100, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    ylimits = c(0, max(c(n100_PlotResultsSIC[1,], n100_PlotResultsLR[1,])) + mean(c(n100_PlotResultsSIC[1,], n100_PlotResultsLR[1,])))
+    plot(100*indexesToCalculate,n100_PlotResultsLR[1,],xlim=c(0,100), ylim=c(0,1), col='blue', pch=20, main=TeX(paste('Power vs Break Index (n=100, $\\theta_1 = ', toString(param1), '$, $\\theta_2=', toString(param2), '$)')), ylab="Empirical Power", xlab="Break Index %")
     lines(100*indexesToCalculate,n100_PlotResultsLR[1,], col='blue')
     par(new=TRUE)
-    plot(100*indexesToCalculate, n100_PlotResultsCS[1,],xlim=c(0,100), ylim=c(0,1),col='red',axes=FALSE, xlab='', ylab='', pch=20)
-    lines(100*indexesToCalculate, n100_PlotResultsCS[1,], col='red')
-    legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
+    plot(100*indexesToCalculate, n100_PlotResultsSIC[1,],xlim=c(0,100), ylim=c(0,1),col='red',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate, n100_PlotResultsSIC[1,], col='red')
+    par(new=TRUE)
+    plot(100*indexesToCalculate, n100_PlotResultsMIC[1,],xlim=c(0,100), ylim=c(0,1),col='green',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate, n100_PlotResultsMIC[1,], col='green')
+    legend('topleft', c('Likelihood Ratio', 'SIC', 'MIC'), col=c('blue', 'red', 'green'), lty=c(1,1,1), cex=0.8)
     
     ## Actual plotting code for n=200
-    ylimits = c(0, max(c(n200_PlotResultsCS[1,], n200_PlotResultsLR[1,])) + mean(c(n200_PlotResultsCS[1,], n200_PlotResultsLR[1,])))
-    plot(100*indexesToCalculate,n200_PlotResultsLR[1,],xlim=c(0,100), ylim=c(0,1), col='blue', pch=20, main=TeX('Power vs Break Index (n=200, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    ylimits = c(0, max(c(n200_PlotResultsSIC[1,], n200_PlotResultsLR[1,])) + mean(c(n200_PlotResultsSIC[1,], n200_PlotResultsLR[1,])))
+    plot(100*indexesToCalculate,n200_PlotResultsLR[1,],xlim=c(0,100), ylim=c(0,1), col='blue', pch=20, main=TeX(paste('Power vs Break Index (n=200, $\\theta_1 = ', toString(param1), '$, $\\theta_2=', toString(param2), '$)')), ylab="Empirical Power", xlab="Break Index %")
     lines(100*indexesToCalculate,n200_PlotResultsLR[1,], col='blue')
     par(new=TRUE)
-    plot(100*indexesToCalculate, n200_PlotResultsCS[1,],xlim=c(0,100), ylim=c(0,1), col='red',axes=FALSE, xlab='', ylab='', pch=20)
-    lines(100*indexesToCalculate,n200_PlotResultsCS[1,], col='red')
-    legend('topleft', c('Likelihood Ratio', 'CUSUM'), col=c('blue', 'red'), lty=c(1,1), cex=0.8)
+    plot(100*indexesToCalculate, n200_PlotResultsSIC[1,],xlim=c(0,100), ylim=c(0,1), col='red',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate,n200_PlotResultsSIC[1,], col='red')
+    par(new=TRUE)
+    plot(100*indexesToCalculate, n200_PlotResultsMIC[1,],xlim=c(0,100), ylim=c(0,1), col='green',axes=FALSE, xlab='', ylab='', pch=20)
+    lines(100*indexesToCalculate,n200_PlotResultsMIC[1,], col='green')
+    legend('topleft', c('Likelihood Ratio', 'SIC', 'MIC'), col=c('blue', 'red', 'green'), lty=c(1,1,1), cex=0.8)
   }
   else if(runLR==1){
     ## Plotting the the power versus break index, and connecting the points with lines (LR Method)
-    plot(n100_PlotResultsLR[1,], main=TeX('Power vs Break Index of LR Method (n=100, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
+    plot(n100_PlotResultsLR[1,], main=TeX(paste('Power vs Break Index of LR Method (n=100, $\\theta_1 = ', toString(param1), '$, $\\theta_2=', toString(param2), '$)')), ylab="Empirical Power", xlab="Break Index %")
     lines(n100_PlotResultsLR[1,])
   }
-  else if(runCUSUM==1){
-    plot(n100_PlotResultsCS[1,], main=TeX('Power vs Break Index of CUSUM Method (n=100, $\\theta_1 = 1.5$, $\\theta_2=2.5$)'), ylab="Empirical Power", xlab="Break Index %")
-    lines(n100_PlotResultsCS[1,])
+  else if(runSIC==1){
+    plot(n100_PlotResultsSIC[1,], main=TeX(paste('Power vs Break Index of SIC Method (n=100, $\\theta_1 = ', toString(param1), '$, $\\theta_2=', toString(param2), '$)')), ylab="Empirical Power", xlab="Break Index %")
+    lines(n100_PlotResultsSIC[1,])
   }
-  
-  
-  
-  
+  else if(runMIC==1){
+    plot(n100_PlotResultsMIC[1,], main=TeX(paste('Power vs Break Index of MIC Method (n=100, $\\theta_1 = ', toString(param1), '$, $\\theta_2=', toString(param2), '$)')), ylab="Empirical Power", xlab="Break Index %")
+    lines(n100_PlotResultsMIC[1,])
+  }
 }
