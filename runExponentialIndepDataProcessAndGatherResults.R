@@ -23,10 +23,10 @@ source('SIC/exponentialIndepMICBreakEstimator.R')
 # Modifiable Parameters
 ################################################################################
 # Difference in mean between distributions
-param1 = 0.5
+param1 = 1
 param2 = 1
 # Number of simulations to perform
-numSims = 5000
+numSims = 10000
 
 # Seed for simulations (if set to 0, the seed is random, and any previously 
 # set seed is globally cleared)
@@ -45,7 +45,7 @@ runMIC = 1
 
 ## Parameters defining the type of output the user wants to see
 # This will tell the code to either output the percent error in detected break locations, or not (1 to run, 0 to not)
-showBreakLocDetectAcc = 1
+showBreakLocDetectAcc = 0
 
 # This will tell the code to output coverage probability curves for the method (TODO: Implement this)
 showCoverageProbabilityCurves = 0
@@ -55,9 +55,13 @@ showCoverageProbabilityCurves = 0
 covProbParamStepSize = 0.04
 
 # This variables dictates whether a parameter sweep graph is generated as 
-# per page 316 of the paper: "The Likelihood Ratio Test for the change point 
+# per page 163 of the paper: "The Likelihood Ratio Test for the change point 
 # problem with exponentially distributed random variables"
-showParamSweepPlotting = 1
+showParamSweepPlot = 0
+# Parameter to determine if the parameter sweep plot should be saved or not
+saveParamSweepPlot = 0
+# Parameter to determine the number of steps of the parameter sweep plot
+paramSweepPlotStepNumber = 100
 
 # Variable declarations
 ################################################################################
@@ -1276,3 +1280,74 @@ if(showCoverageProbabilityCurves == 1){
     lines(n100_PlotResultsMIC[1,])
   }
 }
+
+
+# Code to implement the parameter sweep plot
+if(showParamSweepPlot == 1){
+  # Holding param1 constant, while we sweep out parameter 2
+  pSwParam1 = 1
+  
+  # Only doing these simulations for n=100, and with k = 10, 20, and 50
+  n = 100
+  k = c(0.1*n, 0.2*n, 0.5*n)
+  
+  # Starting from 1/5 and going to 5
+  # param2Vals = seq(from=0.2, to=5, by=paramSweepPlotStepSize)
+  param2Vals = c(seq(from=0.2, to=1, length.out=round(paramSweepPlotStepNumber/2)), seq(from=1, to=5, length.out=round(paramSweepPlotStepNumber/2)))
+  
+  # Preallocating the appropriate simulation matrices
+  if(runLR == 1){
+    paramSweepResults.LR <- matrix(data=NA, nrow=length(param2Vals), ncol=length(k))
+  }
+  if(runSIC == 1){
+    paramSweepResults.SIC <- matrix(data=NA, nrow=length(param2Vals), ncol=length(k))
+  }
+  if(runMIC == 1){
+    paramSweepResults.MIC <- matrix(data=NA, nrow=length(param2Vals), ncol=length(k))
+  }
+  
+  # Running a sweep for each of the three break locations
+  for (j in 1:length(k)){
+    # Sweeping over the param values
+    for (m in 1:length(param2Vals)){
+      simMatrix <-  indepDatagen(simLen=n, numSims=numSims, breakLocations=k[j], param1=pSwParam1, param2=param2Vals[m], seed=curSeed, distFamily='E')
+      if(runLR == 1){
+        paramSweepResults.LR[m,j] <- expIndepLRCalc(simMatrix, alpha=significanceLevel)[1]
+      }
+      if(runSIC == 1){
+        paramSweepResults.SIC[m,j] <- expIndepSICCalc(simMatrix, alpha=significanceLevel)[1]
+      }
+      if(runMIC == 1){
+        paramSweepResults.MIC[m,j] <- expIndepMICCalc(simMatrix, alpha=significanceLevel)[1]
+      }
+    }
+  }
+
+  # Start of plotting code
+  if(runLR==1){
+    
+    plot(x=param2Vals, y=paramSweepResults.LR[,1], log='x', col=rgb(1,0,0), type='l', main='Likelihood Ratio method', xlab=TeX('$\\rho$'), ylab='Estimated Power')
+    par(new=TRUE)
+    plot(x=param2Vals, y=paramSweepResults.LR[,2], log='x', col=rgb(0,1,0), main='', xlab='', ylab='', axes=FALSE, type='l')
+    par(new=TRUE)
+    plot(x=param2Vals, y=paramSweepResults.LR[,3], log='x', col=rgb(0,0,1), main='', xlab='', ylab='', axes=FALSE, type='l')
+    legend('top', c('k=0.1', 'k=0.2', 'k=0.5'), col=c(rgb(1,0,0), rgb(0,1,0), rgb(0,0,1)), lty=c(1,1,1), cex=0.8)
+  }
+  if(runSIC==1){
+    plot(x=param2Vals, y=paramSweepResults.SIC[,1], log='x', col=rgb(1,0,0), type='l', main='SIC method', xlab=TeX('$\\rho$'), ylab='Estimated Power')
+    par(new=TRUE)
+    plot(x=param2Vals, y=paramSweepResults.SIC[,2], log='x', col=rgb(0,1,0), main='', xlab='', ylab='', axes=FALSE, type='l')
+    par(new=TRUE)
+    plot(x=param2Vals, y=paramSweepResults.SIC[,3], log='x', col=rgb(0,0,1), main='', xlab='', ylab='', axes=FALSE, type='l')
+    legend('top', c('k=0.1', 'k=0.2', 'k=0.5'), col=c(rgb(1,0,0), rgb(0,1,0), rgb(0,0,1)), lty=c(1,1,1), cex=0.8)
+  }
+  if(runMIC==1){
+    plot(x=param2Vals, y=paramSweepResults.MIC[,1], log='x', col=rgb(1,0,0), type='l', main='MIC method', xlab=TeX('$\\rho$'), ylab='Estimated Power')
+    par(new=TRUE)
+    plot(x=param2Vals, y=paramSweepResults.MIC[,2], log='x', col=rgb(0,1,0), main='', xlab='', ylab='', axes=FALSE, type='l')
+    par(new=TRUE)
+    plot(x=param2Vals, y=paramSweepResults.MIC[,3], log='x', col=rgb(0,0,1), main='', xlab='', ylab='', axes=FALSE, type='l')
+    legend('top', c('k=0.1', 'k=0.2', 'k=0.5'), col=c(rgb(1,0,0), rgb(0,1,0), rgb(0,0,1)), lty=c(1,1,1), cex=0.8)
+  }
+}
+
