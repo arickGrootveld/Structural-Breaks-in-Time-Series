@@ -1,8 +1,27 @@
 ############################ CUSUMCalc.R ##################################
 # Function utilizing CUSUM calculations to detect statistical breaks
 #
-# v1.0.0
+# v1.0.1
 # Contributors: Jamie Shannon, Arick Grootveld
+#
+# Inputs: 
+#         simMatrix: Matrix of data to use for simulations (generally as output 
+#                    of indepDataGen script). Each row should be a sequence of 
+#                    independently distributed data, such that the first column
+#                    contains the first sample of each sequence
+#         criticalVal: The critical value to be used in the CUSUM calculation
+#         longRunVar: The long run variance to be plugged into the CUSUM
+#                     calculation
+#         
+# Outputs:
+#         outputVals: array of values containing all the results from the 
+#                     simulation
+#             - outputVals[1]: the proportion of the detected breaks from
+#                              the number of sequences that were input
+#             - outputVals[2:-1]: the indexes of the detected breaks. If a value
+#                                 is -1, then no break was detected for that 
+#                                 sequence
+#
 #############################################################################
 CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
   simDims = dim(simMatrix)
@@ -37,9 +56,12 @@ CUSUMCalc <- function(simMatrix, critVal=0.0133, longRunVar=1){
     }
     Mty=c(Mty, MaxType(Mn,longRunVar))
   }
-  coverageProbability <- Cor/simDims[1]
-  # Just returning the coverage probabilitiy for right now, may want to return other stuff later as well
-  return(c(coverageProbability, detectedBreakIndexes))
+  detectedBreakProportion <- Cor/simDims[1]
+  # Returning the proportion of detected breaks to total sample size as the 
+  # first returned value, and the detected break locations as an array after 
+  # the first value. Any values with -1 mean that no break was detected for that
+  # simulation
+  return(c(detectedBreakProportion, detectedBreakIndexes))
 }
 
 # Moved function declarations outside of loops

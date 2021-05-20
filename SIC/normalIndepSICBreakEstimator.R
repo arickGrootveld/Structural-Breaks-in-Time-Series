@@ -3,6 +3,22 @@
 #
 # v1.0.0
 # Contributors: Jamie Shannon, Arick Grootveld
+#
+# Inputs: 
+#         simMatrix: matrix of data to use for simulations (generally as output 
+#                    of indepDataGen script). Each row should be a sequence of 
+#                    independently distributed data, such that the first column
+#                    contains the first sample of each sequence
+#         alpha: the significance level for the estimator
+# Outputs:
+#         outputVals: array of values containing all the results from the 
+#                     simulation
+#             - outputVals[1]: the proportion of the detected breaks from
+#                              the number of sequences that were input
+#             - outputVals[2:-1]: the indexes of the detected breaks. If a value
+#                                 is -1, then no break was detected for that 
+#                                 sequence
+#
 #############################################################################
 
 ## Supporting functions used by the main function
@@ -51,6 +67,10 @@ normalIndepSICCalc <- function(simMatrix, param1, param2){
       detectedBreakIndexes[1, simNum] = potentialIndex # Since a change was detected we grab the index we detected it at
     }
   }
-  coverageProb <- Cor/simDims[1]
-  return(c(coverageProb, detectedBreakIndexes))
+  detectedBreakProportion <- Cor/simDims[1]
+  # Returning the proportion of detected breaks to total sample size as the 
+  # first returned value, and the detected break locations as an array after 
+  # the first value. Any values with -1 mean that no break was detected for that
+  # simulation
+  return(c(detectedBreakProportion, detectedBreakIndexes))
 }

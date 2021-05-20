@@ -2,8 +2,24 @@
 # Function to calculate Modified Swartz Information Criterion, for detecting
 # statistical breaks in normally distributed independent data
 #
-# v1.0.0
+# v1.0.1
 # Contributors: Andrea Scolari, Arick Grootveld, Ramadha Piyadi Gamage
+#
+# Inputs: 
+#         simMatrix: matrix of data to use for simulations (generally as output 
+#                    of indepDataGen script). Each row should be a sequence of 
+#                    independently distributed data, such that the first column
+#                    contains the first sample of each sequence
+#         alpha: the significance level for the estimator
+# Outputs:
+#         outputVals: array of values containing all the results from the 
+#                     simulation
+#             - outputVals[1]: the proportion of the detected breaks from
+#                              the number of sequences that were input
+#             - outputVals[2:-1]: the indexes of the detected breaks. If a value
+#                                 is -1, then no break was detected for that 
+#                                 sequence
+#
 #############################################################################
 normIndepMICCalc <- function(simMatrix, alpha=0.05){
   # Calculated parameters to be used for the simulation
@@ -69,9 +85,12 @@ normIndepMICCalc <- function(simMatrix, alpha=0.05){
     }
   }
   
-  # Calculating the coverage probability
+  # Calculating the proportion of detected breaks
   numDetected <- sum(breakDetected)
-  
-  coverageProbability <- numDetected / simDims[1]
-  return(c(coverageProbability, detectedBreakIndexes))
+  detectedBreakProportion <- numDetected / simDims[1]
+  # Returning the proportion of detected breaks to total sample size as the 
+  # first returned value, and the detected break locations as an array after 
+  # the first value. Any values with -1 mean that no break was detected for that
+  # simulation
+  return(c(detectedBreakProportion, detectedBreakIndexes))
 }
