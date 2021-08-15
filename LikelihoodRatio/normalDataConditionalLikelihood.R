@@ -1,15 +1,22 @@
-############################ normalDataParametricLikelihood.R ##################################
-# Function to calculate Likelihood Ratios, for detecting statistical breaks
-# in normally distributed independent data
+############################ normalDataConditionalLikelihood.R ##################################
+# Function to calculate Conditional Likelihood Ratio, for detecting statistical breaks
+# in normally distributed time series data suspected to come from a AR process
 #
-# v1.0.2
-# Contributors: Andrea Scolari, Arick Grootveld
+# The conditional likelihood implementation is taken from 
+# "Empirical Likelihood" by Art B. Owen. Specifically from the equation
+# on page 173 (pdf version) equation 8.5
+# 
+#
+# v1.0.0
+# Contributors: Andrea Scolari, Arick Grootveld, Ramadha Piyadi Gamage
 #
 # Inputs: 
 #         simMatrix: matrix of data to use for simulations (generally as output 
 #                    of indepDataGen script). Each row should be a sequence of 
 #                    independently distributed data, such that the first column
 #                    contains the first sample of each sequence
+#         mu:     The mean of the noise term for the AR process
+#         sigma:  The standard deviation of the noise term for the AR process
 #         alpha: the significance level for the estimator
 # Outputs:
 #         outputVals: array of values containing all the results from the 
@@ -21,7 +28,7 @@
 #                                 sequence
 #
 #############################################################################
-normalIndepLRCalc <- function(simMatrix, alpha=0.05){
+normalCondLRCalc <- function(simMatrix, mu, sigma, alpha=0.05){
   # Calculated parameters to be used for the simulation
   criticalValue = -log(-0.5*log(1-alpha))
   
@@ -47,51 +54,44 @@ normalIndepLRCalc <- function(simMatrix, alpha=0.05){
     
     denominators <- matrix(0, 1, length(simSeq))
     
-    # Calculating the numerator of the likelihood ratio as the pdf of each sample coming from a distribution with mean equal to the sample mean
-    numerator = prod(dnorm(simSeq, mean=mean(simSeq), sd=1))
+    # Estimating the AR process parameter using the 
+    # OLS estimator as shown in this video:
+    # https://www.youtube.com/watch?v=YvB3k00SF7w
+    # OLS_est_of_AR_param <- (sum(simSeq[2:simSeqLen] * simSeq[1:(simSeqLen - 1)])) / (sum(simSeq[1:(simSeqLen-1)]^2))
+    
+    # estOfARParam <- as.numeric(arima(simSeq, order=c(1,0,0), method="ML")$coef[1])
+    estOfARParam <- as.numeric(ar(simSeq, order.max=1, method='yw', aic=FALSE)$ar)
+    
+    # Estimating the numerator portion from the conditional likelihood
+    numerator <- condLikelihood(timeSeries = simSeq, mu = mu, sigma = sigma, beta_1 = estOfARParam)
     
     # For loop through each index of potential break
-    for (i in c(1:(simSeqLen-1))){
+    for (i in c(3:(simSeqLen-3))){
       # Grabbing the sequence from before where we think the break happened
       before <- simSeq[1:i]
       # Grabbing the sequence from after the location the break happened
       after <- simSeq[(i+1):(simSeqLen)]
       
-      # Calculating the probablities of each of the samples being from the before distribution
-      beforePdf <- prod(dnorm(before, mean=mean(before), sd=1))
+      # beforeEstOfARParam <- as.numeric(arima(before, order=c(1,0,0), method="ML")$coef[1])
+      # afterEstOfARParam <- as.numeric(arima(after, order=c(1,0,0), method="ML")$coef[1])
+      beforeEstOfARParam <-  as.numeric(ar(before, order.max=1, method='yw', aic=FALSE)$ar)
+      afterEstOfARParam <-  as.numeric(ar(after, order.max=1, method='yw', aic=FALSE)$ar)
+      
+      # Calculating the probabilities of each of the samples being from the before distribution
+      beforePdf <- condLikelihood(timeSeries = before, mu=mu, sigma=sigma, beta_1 = beforeEstOfARParam)
       
       # Calculating the probabilities of each of the samples from the after distribution
-      afterPdf <- prod(dnorm(after, mean=mean(after), sd=1))
+      afterPdf <- condLikelihood(timeSeries = after, mu=mu, sigma = sigma, beta_1 = afterEstOfARParam)
       
-      # Probability break was from dist1 to dist2, or from dist2 to dist1
-      # option1 <- beforePdf1 * afterPdf2
-      # option2 <- beforePdf2 * afterPdf1
-      
-      # Whichever one is larger of the posibilities is the denominator of the
-      # likelihood ratio at this location
-      #denominators[i] <- max(c(option1, option2))
       denominators[i] <- beforePdf * afterPdf
     }
-    
-    ## No longer relevant
-    # We add the possibility of no breaks into the denominator, so the numberator becomes a subset of the denominator
-    # This is part of the requirement for Wilks's theorm to be true
-    # denominators[i+1] = numerator
-    
     breakLoc <- which.max(denominators)
+    # denominators[which(denominators == 0)] = Inf
     
-    
-    #### End of test lines
     likelihoodRatio = max(-2 * log(numerator / denominators))
     
     # Special value that Ramadha is having us calculate
     testStatistic[1,simNum] = (2*log(log(simDims[2])))^(1/2) * (likelihoodRatio)^(1/2) - (2*log(log(simDims[2])) + log(log(log(simDims[2]))))
-    
-    # pVals[1,simNum] = 1 - pchisq(likelihoodRatio, df=1)
-    
-    #if(pVals[1, simNum] < alpha){
-    #  breakDetected[1, simNum] = 1
-    #}
     
     # If our test statistic is NaN, then we want to reject
     # This only happens if the maximal LR is negative
@@ -118,4 +118,17 @@ normalIndepLRCalc <- function(simMatrix, alpha=0.05){
   # the first value. Any values with -1 mean that no break was detected for that
   # simulation
   return(c(detectedBreakProportion, detectedBreakIndexes))
+}
+
+
+# Function for calculating the conditional likelihood of a series of samples, assuming the samples
+# come from an AR(1) process with a noise term ~ N(mu, sigma^2), and with AR param beta_1
+condLikelihood <- function(timeSeries, mu, sigma, beta_1){
+  numEls <- length(timeSeries)
+  likelihoodHolder <- 1
+  
+  for(i in 2:numEls){
+    likelihoodHolder <- likelihoodHolder * (1/(sqrt(2*pi) * sigma)) * exp(-(1/(2*sigma^2)) * ((timeSeries[i] - mu) - (beta_1 * (timeSeries[i - 1] - mu)) )^2 )
+  }
+  return(likelihoodHolder)
 }

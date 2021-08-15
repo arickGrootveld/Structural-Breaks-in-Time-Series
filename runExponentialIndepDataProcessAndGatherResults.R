@@ -1,12 +1,12 @@
 
-## This script generates multiple datasets of independent exponentially
-## distributed data, with breaks at specified locations. The script
-## computes the ability of two methods to detect the presence of these
+## This script generates multiple datasets of time series (AR(1))
+## data, with breaks at specified locations. The script
+## computes the ability of three methods to detect the presence of these
 ## breaks: Likelihood Ratio, and SIC.
 
 ## This code is effectively very similar to the runNormalDataProcessAndGatherResults
 ## code, but with the exception that we use exponentially distributed data 
-## instead of normally distributed data
+## instead of normally distributed data for generating the samples
 
 # Importing datagen function
 source('indepDatagen.R')
@@ -24,9 +24,9 @@ source('SIC/exponentialIndepMICBreakEstimator.R')
 ################################################################################
 # Difference in mean between distributions
 param1 = 1
-param2 = 1
+param2 = 2
 # Number of simulations to perform
-numSims = 10000
+numSims = 100
 
 # Seed for simulations (if set to 0, the seed is random, and any previously 
 # set seed is globally cleared)
